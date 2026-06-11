@@ -383,13 +383,13 @@ export default function ClientManager({
                 onChange={(e) => setSocialNetwork(e.target.value)}
                 className="w-full px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50"
               >
-                <option value="Instagram" className="bg-slate-100 dark:bg-slate-900 text-text-primary">Instagram</option>
-                <option value="Facebook" className="bg-slate-100 dark:bg-slate-900 text-text-primary">Facebook</option>
-                <option value="TikTok" className="bg-slate-100 dark:bg-slate-900 text-text-primary">TikTok</option>
-                <option value="LinkedIn" className="bg-slate-100 dark:bg-slate-900 text-text-primary">LinkedIn</option>
-                <option value="Twitter/X" className="bg-slate-100 dark:bg-slate-900 text-text-primary">Twitter/X</option>
-                <option value="YouTube" className="bg-slate-100 dark:bg-slate-900 text-text-primary">YouTube</option>
-                <option value="Outro" className="bg-slate-100 dark:bg-slate-900 text-text-primary">Outro</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Facebook">Facebook</option>
+                <option value="TikTok">TikTok</option>
+                <option value="LinkedIn">LinkedIn</option>
+                <option value="Twitter/X">Twitter/X</option>
+                <option value="YouTube">YouTube</option>
+                <option value="Outro">Outro</option>
               </select>
             </div>
             <div className="space-y-1">

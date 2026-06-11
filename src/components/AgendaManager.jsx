@@ -369,10 +369,10 @@ export default function AgendaManager({
               onChange={(e) => setType(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50 cursor-pointer"
             >
-              <option value="Captação" className="bg-slate-100 dark:bg-slate-900 text-text-primary">Captação (Fotos/Gravação)</option>
-              <option value="Reunião" className="bg-slate-100 dark:bg-slate-900 text-text-primary">Reunião com Cliente</option>
-              <option value="Publicação" className="bg-slate-100 dark:bg-slate-900 text-text-primary">Publicação Especial</option>
-              <option value="Outro" className="bg-slate-100 dark:bg-slate-900 text-text-primary">Outros Lembretes</option>
+              <option value="Captação">Captação (Fotos/Gravação)</option>
+              <option value="Reunião">Reunião com Cliente</option>
+              <option value="Publicação">Publicação Especial</option>
+              <option value="Outro">Outros Lembretes</option>
             </select>
           </div>
 

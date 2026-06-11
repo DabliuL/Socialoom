@@ -193,9 +193,9 @@ export default function FinanceManager({
                         onChange={(e) => onUpdateClientStatus(client.id, e.target.value)}
                         className={`text-[10px] px-2 py-0.5 rounded-full font-bold border outline-none cursor-pointer bg-slate-100 dark:bg-slate-900 ${client.paymentStatus === 'paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : client.paymentStatus === 'overdue' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}
                       >
-                        <option value="paid" className="bg-white dark:bg-slate-900 text-emerald-500">Em Dia</option>
-                        <option value="overdue" className="bg-white dark:bg-slate-900 text-red-500">Atrasado</option>
-                        <option value="ended" className="bg-white dark:bg-slate-900 text-slate-500">Contrato Encerrado</option>
+                        <option value="paid">Em Dia</option>
+                        <option value="overdue">Atrasado</option>
+                        <option value="ended">Contrato Encerrado</option>
                       </select>
                     </div>
 

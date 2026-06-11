@@ -299,11 +299,11 @@ export default function Dashboard({
                         onChange={(e) => onUpdateTaskStatus(task.id, e.target.value)}
                         className={`text-xs px-2.5 py-1 rounded-full border font-semibold outline-none cursor-pointer bg-slate-100 dark:bg-slate-900 ${getStatusColor(task.status)}`}
                       >
-                        <option value="todo" className="bg-white dark:bg-slate-900 text-blue-500">A Fazer</option>
-                        <option value="pending" className="bg-white dark:bg-slate-900 text-amber-500">Pendente</option>
-                        <option value="approval" className="bg-white dark:bg-slate-900 text-orange-500">Em Aprovação</option>
-                        <option value="urgent" className="bg-white dark:bg-slate-900 text-red-500">Urgente</option>
-                        <option value="completed" className="bg-white dark:bg-slate-900 text-emerald-500">Concluído</option>
+                        <option value="todo">A Fazer</option>
+                        <option value="pending">Pendente</option>
+                        <option value="approval">Em Aprovação</option>
+                        <option value="urgent">Urgente</option>
+                        <option value="completed">Concluído</option>
                       </select>
                     </div>
                   </div>

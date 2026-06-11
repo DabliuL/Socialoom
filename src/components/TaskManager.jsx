@@ -98,12 +98,34 @@ export default function TaskManager({
     }
   };
 
+  const getStatusTextColor = (s) => {
+    switch (s) {
+      case 'todo': return 'text-blue-500';
+      case 'pending': return 'text-yellow-600 dark:text-yellow-400';
+      case 'approval': return 'text-orange-500';
+      case 'urgent': return 'text-red-500';
+      case 'completed': return 'text-green-600 dark:text-green-400';
+      default: return 'text-text-secondary';
+    }
+  };
+
+  const getStatusBorderColor = (s) => {
+    switch (s) {
+      case 'todo': return 'border-t-blue-500';
+      case 'pending': return 'border-t-yellow-500';
+      case 'approval': return 'border-t-orange-500';
+      case 'urgent': return 'border-t-red-500';
+      case 'completed': return 'border-t-green-500';
+      default: return 'border-t-glass-border';
+    }
+  };
+
   const getStatusBadgeColor = (s) => {
     switch (s) {
-      case 'todo': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      case 'todo': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       case 'pending': return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
       case 'approval': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
-      case 'urgent': return 'bg-red-500/10 text-red-400 border-red-500/20';
+      case 'urgent': return 'bg-red-500/10 text-red-500 border-red-500/20';
       case 'completed': return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
       default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
@@ -223,7 +245,7 @@ export default function TaskManager({
         {/* Mobile tasks list for activeMobileStatus */}
         <div className="glass-panel p-4 rounded-2xl min-h-[300px] space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-glass-border">
-            <span className="font-bold text-xs text-text-secondary uppercase">{getStatusLabel(activeMobileStatus)}</span>
+            <span className={`font-bold text-xs uppercase ${getStatusTextColor(activeMobileStatus)}`}>{getStatusLabel(activeMobileStatus)}</span>
             <button
               onClick={() => openAddModal(activeMobileStatus)}
               className="p-1 rounded bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 transition cursor-pointer"
@@ -287,11 +309,11 @@ export default function TaskManager({
           return (
             <div 
               key={st}
-              className={`flex-shrink-0 w-72 glass-panel p-4 rounded-2xl flex flex-col max-h-[550px] overflow-hidden border-t-2 ${getStatusColumnColor(st).split(' ')[0]}`}
+              className={`flex-shrink-0 w-72 glass-panel p-4 rounded-2xl flex flex-col max-h-[550px] overflow-hidden border-t-4 ${getStatusBorderColor(st)}`}
             >
               <div className="flex items-center justify-between pb-3 border-b border-glass-border">
-                <span className="font-bold text-xs text-text-secondary uppercase tracking-wider">{getStatusLabel(st)}</span>
-                <span className="text-[10px] font-bold bg-indigo-500/10 text-indigo-500 px-1.5 py-0.5 rounded-full border border-indigo-500/10">{statusTasks.length}</span>
+                <span className={`font-bold text-xs uppercase tracking-wider ${getStatusTextColor(st)}`}>{getStatusLabel(st)}</span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${getStatusBadgeColor(st)}`}>{statusTasks.length}</span>
               </div>
 
               {/* Tasks scroll container */}
@@ -382,7 +404,7 @@ export default function TaskManager({
               className="w-full px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50 cursor-pointer"
             >
               {weekdays.map(day => (
-                <option key={day} value={day} className="bg-slate-100 dark:bg-slate-900 text-text-primary">{day}</option>
+                <option key={day} value={day}>{day}</option>
               ))}
             </select>
           </div>
@@ -410,11 +432,11 @@ export default function TaskManager({
               onChange={(e) => setStatus(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50 cursor-pointer"
             >
-              <option value="todo" className="bg-slate-100 dark:bg-slate-900 text-blue-500">A Fazer</option>
-              <option value="pending" className="bg-slate-100 dark:bg-slate-900 text-yellow-600 dark:text-yellow-400">Pendente</option>
-              <option value="approval" className="bg-slate-100 dark:bg-slate-900 text-orange-500">Em Aprovação</option>
-              <option value="urgent" className="bg-slate-100 dark:bg-slate-900 text-red-500">Urgente</option>
-              <option value="completed" className="bg-slate-100 dark:bg-slate-900 text-green-600 dark:text-green-400">Concluído</option>
+              <option value="todo">A Fazer</option>
+              <option value="pending">Pendente</option>
+              <option value="approval">Em Aprovação</option>
+              <option value="urgent">Urgente</option>
+              <option value="completed">Concluído</option>
             </select>
           </div>
 
