@@ -128,10 +128,11 @@ export default function AgendaManager({
   const filteredReminders = reminders
     .filter(r => filterType === 'all' || r.type === filterType)
     .sort((a, b) => {
-      // Sort by date then by time
-      const dateTimeA = `${a.date}T${a.time || '00:00'}`;
-      const dateTimeB = `${b.date}T${b.time || '00:00'}`;
-      return new Date(dateTimeA) - new Date(dateTimeB);
+      // Sort by date first (lexicographical string comparison)
+      const dateCompare = (a.date || '').localeCompare(b.date || '');
+      if (dateCompare !== 0) return dateCompare;
+      // If dates are equal, sort by time (lexicographical string comparison)
+      return (a.time || '00:00').localeCompare(b.time || '00:00');
     });
 
   // Group reminders
@@ -144,22 +145,47 @@ export default function AgendaManager({
 
   // Date label helper
   const getDateLabel = (dateStr) => {
-    const today = new Date().toISOString().split('T')[0];
-    
+    if (!dateStr) return 'Sem data';
+
+    // Get local today and tomorrow strings
+    const getLocalStr = (d) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const today = getLocalStr(new Date());
+
     const tomorrowDate = new Date();
     tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-    const tomorrow = tomorrowDate.toISOString().split('T')[0];
+    const tomorrow = getLocalStr(tomorrowDate);
 
     if (dateStr === today) return 'Hoje';
     if (dateStr === tomorrow) return 'Amanhã';
 
-    // Format like "Quinta, 18 de Junho"
-    const parsedDate = new Date(dateStr + 'T12:00:00');
-    return parsedDate.toLocaleDateString('pt-BR', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long' 
-    });
+    try {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        // Create date at local noon to avoid timezone shift
+        const parsedDate = new Date(year, month, day, 12, 0, 0);
+        if (!isNaN(parsedDate.getTime())) {
+          const formatted = parsedDate.toLocaleDateString('pt-BR', { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long' 
+          });
+          return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+      }
+    } catch (e) {
+      console.error('Erro ao formatar data:', e);
+    }
+
+    return dateStr; // fallback
   };
 
   return (
@@ -366,7 +392,7 @@ export default function AgendaManager({
               <label className="block font-bold text-text-secondary text-xs uppercase">Horário</label>
               <input 
                 type="time" 
-                value={time}
+                value={time || ''}
                 onChange={(e) => setTime(e.target.value)}
                 className="w-full px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50"
               />

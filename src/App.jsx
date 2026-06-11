@@ -20,6 +20,7 @@ import ClientManager from './components/ClientManager';
 import TaskManager from './components/TaskManager';
 import FinanceManager from './components/FinanceManager';
 import AgendaManager from './components/AgendaManager';
+import Modal from './components/Modal';
 
 const DEFAULT_CLIENTS = [
   {
@@ -74,11 +75,23 @@ export default function App() {
   const [userName, setUserName] = useState('Social Media');
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   
+  // Backup modal state
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [backupText, setBackupText] = useState('');
+  const [pasteText, setPasteText] = useState('');
+
   // Shortcut states to trigger child modal forms
   const [taskManagerRef, setTaskManagerRef] = useState(null);
   const [clientManagerRef, setClientManagerRef] = useState(null);
+
+  const openBackupModal = () => {
+    const data = JSON.stringify({ clients, tasks, transactions, userName, reminders });
+    setBackupText(data);
+    setPasteText('');
+    setIsBackupModalOpen(true);
+  };
 
   // 1. Initial Load
   useEffect(() => {
@@ -214,11 +227,9 @@ export default function App() {
     setReminders(prev => prev.map(r => r.id === id ? { ...r, completed: !r.completed } : r));
   };
 
-  // Backup handlers
-  const handleExportBackup = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(
-      JSON.stringify({ clients, tasks, transactions, userName, reminders })
-    );
+  // Backup handlers inside the Backup Modal
+  const handleDownloadBackup = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(backupText);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute("download", `socialoom_backup_${new Date().toISOString().split('T')[0]}.json`);
@@ -227,7 +238,65 @@ export default function App() {
     downloadAnchor.remove();
   };
 
-  const handleImportBackup = (e) => {
+  const handleShareBackup = async () => {
+    if (navigator.share) {
+      try {
+        const file = new File(
+          [backupText], 
+          `socialoom_backup_${new Date().toISOString().split('T')[0]}.json`, 
+          { type: 'application/json' }
+        );
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Socialoom Backup',
+            text: 'Backup dos dados do Socialoom.'
+          });
+        } else {
+          await navigator.share({
+            title: 'Socialoom Backup Code',
+            text: backupText
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao compartilhar:', err);
+        handleCopyBackupCode();
+      }
+    } else {
+      handleCopyBackupCode();
+    }
+  };
+
+  const handleCopyBackupCode = () => {
+    navigator.clipboard.writeText(backupText);
+    alert('Código de backup copiado para a área de transferência!');
+  };
+
+  const handleImportTextBackup = () => {
+    if (!pasteText.trim()) {
+      alert('Por favor, cole um código de backup válido.');
+      return;
+    }
+    try {
+      const parsed = JSON.parse(pasteText);
+      if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders) {
+        setClients(parsed.clients || []);
+        setTasks(parsed.tasks || []);
+        setTransactions(parsed.transactions || []);
+        setUserName(parsed.userName || 'Social Media');
+        setReminders(parsed.reminders || []);
+        alert("Backup restaurado com sucesso!");
+        setIsBackupModalOpen(false);
+      } else {
+        alert("Código de backup inválido.");
+      }
+    } catch (err) {
+      alert("Erro ao decodificar código JSON. Certifique-se de que copiou o código completo.");
+    }
+  };
+
+  const handleImportFileBackup = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -241,6 +310,7 @@ export default function App() {
           setUserName(parsed.userName || 'Social Media');
           setReminders(parsed.reminders || []);
           alert("Backup restaurado com sucesso!");
+          setIsBackupModalOpen(false);
         } else {
           alert("Arquivo de backup inválido.");
         }
@@ -262,7 +332,7 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-bg-app text-text-primary flex flex-col md:flex-row">
+    <div className="min-h-screen bg-bg-app text-text-primary flex flex-col">
       
       {/* Sidebar Backdrop Overlay on Mobile */}
       {isSidebarOpen && (
@@ -273,7 +343,7 @@ export default function App() {
       )}
 
       {/* 1. SIDEBAR (Desktop Fixed / Mobile Drawer) */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-glass-border p-6 flex flex-col justify-between h-full transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:fixed md:flex`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-glass-border p-6 flex flex-col justify-between h-full transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:fixed md:flex`}>
         <div className="space-y-8">
           {/* Logo Brand & Close button */}
           <div className="flex items-center justify-between gap-2">
@@ -287,10 +357,10 @@ export default function App() {
               </div>
             </div>
             
-            {/* Mobile Close Button */}
+            {/* Close Button */}
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="md:hidden p-1 text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition"
+              className="p-1 text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -317,22 +387,13 @@ export default function App() {
         {/* Bottom Actions */}
         <div className="space-y-4 pt-4 border-t border-glass-border">
           {/* Backup utility */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button 
-              onClick={handleExportBackup}
-              className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-secondary hover:text-text-primary transition font-semibold cursor-pointer"
-              title="Exportar Backup"
-            >
-              <Download size={14} /> Exportar
-            </button>
-            <label 
-              className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-secondary hover:text-text-primary transition font-semibold cursor-pointer"
-              title="Importar Backup"
-            >
-              <Upload size={14} /> Importar
-              <input type="file" accept=".json" className="hidden" onChange={handleImportBackup} />
-            </label>
-          </div>
+          <button 
+            onClick={openBackupModal}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 border border-indigo-500/25 hover:border-indigo-500/40 transition font-semibold cursor-pointer text-xs"
+            title="Gestão de Backups"
+          >
+            <Download size={14} /> Gestão de Backups
+          </button>
 
           {/* Theme & Profile Panel */}
           <div className="flex items-center justify-between p-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border">
@@ -347,8 +408,8 @@ export default function App() {
         </div>
       </aside>
 
-      {/* 2. HEADER BAR (Mobile only - md down) */}
-      <header className="md:hidden glass-panel border-b border-glass-border p-3 sticky top-0 z-40 flex items-center justify-between w-full">
+      {/* 2. HEADER BAR (Mobile always / Desktop when sidebar is closed) */}
+      <header className={`${isSidebarOpen ? 'md:hidden' : ''} glass-panel border-b border-glass-border p-3 sticky top-0 z-40 flex items-center justify-between w-full`}>
         <div className="flex items-center gap-3">
           {/* Hamburger Menu Button (prominent style) */}
           <button 
@@ -371,24 +432,20 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Quick backup actions */}
+          {/* Backup Action */}
           <button 
-            onClick={handleExportBackup} 
-            className="p-1.5 text-text-secondary hover:text-text-primary cursor-pointer" 
-            title="Exportar Backup"
+            onClick={openBackupModal} 
+            className="p-1.5 text-text-secondary hover:text-text-primary cursor-pointer flex items-center justify-center" 
+            title="Gestão de Backups"
           >
             <Download size={16} />
           </button>
-          <label className="p-1.5 text-text-secondary hover:text-text-primary cursor-pointer" title="Importar Backup">
-            <Upload size={16} />
-            <input type="file" accept=".json" className="hidden" onChange={handleImportBackup} />
-          </label>
           <div className="w-px h-4 bg-glass-border mx-1"></div>
           
           {/* Theme switcher */}
           <button 
             onClick={toggleTheme}
-            className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5 transition cursor-pointer"
+            className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5 transition cursor-pointer flex items-center justify-center"
           >
             {theme === 'dark' ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-indigo-500" />}
           </button>
@@ -396,7 +453,7 @@ export default function App() {
       </header>
 
       {/* 3. MAIN WORKSPACE */}
-      <main className="flex-1 md:ml-64 p-4 md:p-8 pb-20 md:pb-8 max-w-7xl">
+      <main className={`flex-1 p-4 md:p-8 pb-20 md:pb-8 max-w-7xl min-w-0 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
         {currentTab === 'dashboard' && (
           <Dashboard 
             clients={clients}
@@ -408,7 +465,6 @@ export default function App() {
             onNavigate={setCurrentTab}
             onAddClient={() => {
               setCurrentTab('clients');
-              // Let child manager trigger modal open (automatically open on mount if clients tab handles it, or we can handle it via a direct toggle)
               setTimeout(() => {
                 const btn = document.querySelector('button[class*="bg-indigo-500"]');
                 if (btn) btn.click();
@@ -479,6 +535,82 @@ export default function App() {
           </button>
         ))}
       </div>
+
+      {/* 5. BACKUP & RESTORE MODAL */}
+      <Modal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+        title="Gestão de Backups"
+      >
+        <div className="space-y-6 text-sm">
+          {/* Seção de Exportação */}
+          <div className="space-y-3 p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border">
+            <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider text-indigo-400">Exportar Backup</h4>
+            <p className="text-xs text-text-secondary">Salve seus clientes, tarefas e financeiro para não perder nada.</p>
+            <div className="flex flex-col gap-2 pt-1">
+              <button 
+                onClick={handleDownloadBackup}
+                className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold transition cursor-pointer text-xs shadow-md shadow-indigo-500/10"
+              >
+                <Download size={14} /> Baixar Arquivo JSON (PC/Web)
+              </button>
+              {navigator.share && (
+                <button 
+                  onClick={handleShareBackup}
+                  className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-semibold transition cursor-pointer text-xs shadow-md shadow-purple-500/10"
+                >
+                  <Upload size={14} /> Compartilhar Backup (Android/Mobile)
+                </button>
+              )}
+              <button 
+                onClick={handleCopyBackupCode}
+                className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-black/10 dark:bg-white/5 border border-glass-border text-text-primary hover:bg-black/20 dark:hover:bg-white/10 font-semibold transition cursor-pointer text-xs"
+              >
+                Copiar Código de Backup (Texto)
+              </button>
+            </div>
+          </div>
+
+          {/* Seção de Importação */}
+          <div className="space-y-3 p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border">
+            <h4 className="font-bold text-text-primary text-xs uppercase tracking-wider text-indigo-400">Importar Backup</h4>
+            <p className="text-xs text-text-secondary">Restaure seus dados a partir de um arquivo JSON ou de um código copiado.</p>
+            
+            <div className="flex flex-col gap-3 pt-1">
+              {/* Arquivo */}
+              <label 
+                className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-black/10 dark:bg-white/5 border border-glass-border text-text-primary hover:bg-black/20 dark:hover:bg-white/10 font-semibold transition cursor-pointer text-xs"
+              >
+                <Upload size={14} /> Selecionar Arquivo JSON
+                <input type="file" accept=".json" className="hidden" onChange={handleImportFileBackup} />
+              </label>
+              
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-glass-border"></div>
+                <span className="flex-shrink mx-3 text-text-secondary text-[10px] uppercase font-bold">Ou via código</span>
+                <div className="flex-grow border-t border-glass-border"></div>
+              </div>
+
+              {/* Área de texto */}
+              <div className="space-y-1.5">
+                <textarea
+                  value={pasteText}
+                  onChange={(e) => setPasteText(e.target.value)}
+                  placeholder="Cole o código JSON do seu backup aqui..."
+                  rows="3"
+                  className="w-full px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50 text-xs font-mono"
+                />
+                <button 
+                  onClick={handleImportTextBackup}
+                  className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-xl transition cursor-pointer text-xs shadow-lg shadow-indigo-500/10"
+                >
+                  Restaurar via Código
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

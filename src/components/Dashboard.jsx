@@ -68,6 +68,17 @@ export default function Dashboard({
   const todayName = weekdaysMap[new Date().getDay()];
   const todayTasks = tasks.filter(t => t.dayOfWeek === todayName);
   
+  // Get reminders for today (local date YYYY-MM-DD)
+  const getLocalDateString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const todayStr = getLocalDateString();
+  const todayReminders = reminders.filter(r => r.date === todayStr);
+  
   // Get clients with overdue payment status
   const overdueClients = clients.filter(c => c.paymentStatus === 'overdue');
 
