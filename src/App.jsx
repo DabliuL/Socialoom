@@ -8,7 +8,9 @@ import {
   Sun, 
   Download, 
   Upload,
-  Sparkles
+  Sparkles,
+  Menu,
+  X
 } from 'lucide-react';
 
 // Components
@@ -64,6 +66,7 @@ export default function App() {
   const [userName, setUserName] = useState('Social Media');
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Shortcut states to trigger child modal forms
   const [taskManagerRef, setTaskManagerRef] = useState(null);
@@ -101,12 +104,16 @@ export default function App() {
   // 2. Save Data on changes
   useEffect(() => {
     if (clients.length > 0 || tasks.length > 0 || transactions.length > 0 || userName !== 'Social Media') {
-      localStorage.setItem('socialoom_data', JSON.stringify({
-        clients,
-        tasks,
-        transactions,
-        userName
-      }));
+      try {
+        localStorage.setItem('socialoom_data', JSON.stringify({
+          clients,
+          tasks,
+          transactions,
+          userName
+        }));
+      } catch (err) {
+        console.error('Erro ao salvar dados no localStorage (cota excedida?):', err);
+      }
     }
   }, [clients, tasks, transactions, userName]);
 
@@ -226,18 +233,36 @@ export default function App() {
   return (
     <div className="min-h-screen bg-bg-app text-text-primary flex flex-col md:flex-row">
       
-      {/* 1. SIDEBAR (Desktop only - md and up) */}
-      <aside className="hidden md:flex flex-col justify-between w-64 glass-panel border-r border-glass-border p-6 fixed h-full z-30">
+      {/* Sidebar Backdrop Overlay on Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* 1. SIDEBAR (Desktop Fixed / Mobile Drawer) */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-glass-border p-6 flex flex-col justify-between h-full transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:fixed md:flex`}>
         <div className="space-y-8">
-          {/* Logo Brand */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
-              <Sparkles size={20} />
+          {/* Logo Brand & Close button */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+                <Sparkles size={20} />
+              </div>
+              <div>
+                <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent">Socialoom</h1>
+                <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestor Social Media</span>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent">Socialoom</h1>
-              <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestor Social Media</span>
-            </div>
+            
+            {/* Mobile Close Button */}
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden p-1 text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition"
+            >
+              <X size={18} />
+            </button>
           </div>
 
           {/* Navigation links */}
@@ -245,7 +270,10 @@ export default function App() {
             {navItems.map(item => (
               <button
                 key={item.id}
-                onClick={() => setCurrentTab(item.id)}
+                onClick={() => {
+                  setCurrentTab(item.id);
+                  setIsSidebarOpen(false);
+                }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${currentTab === item.id ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/10' : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'}`}
               >
                 {item.icon}
@@ -289,14 +317,25 @@ export default function App() {
       </aside>
 
       {/* 2. HEADER BAR (Mobile only - md down) */}
-      <header className="md:hidden glass-panel border-b border-glass-border p-4 sticky top-0 z-40 flex items-center justify-between w-full">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-white shadow shadow-indigo-500/20">
-            <Sparkles size={16} />
-          </div>
-          <div>
-            <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none">Socialoom</h1>
-            <span className="text-[8px] text-text-secondary font-bold uppercase tracking-wider">Gestor</span>
+      <header className="md:hidden glass-panel border-b border-glass-border p-3 sticky top-0 z-40 flex items-center justify-between w-full">
+        <div className="flex items-center gap-3">
+          {/* Hamburger Menu Button */}
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5 transition cursor-pointer"
+            title="Abrir Menu"
+          >
+            <Menu size={20} />
+          </button>
+          
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-white shadow shadow-indigo-500/20">
+              <Sparkles size={14} />
+            </div>
+            <div>
+              <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none">Socialoom</h1>
+              <span className="text-[8px] text-text-secondary font-bold uppercase tracking-wider">Gestor</span>
+            </div>
           </div>
         </div>
 

@@ -39,12 +39,41 @@ export default function ClientManager({
   const [detailClient, setDetailClient] = useState(null);
 
   // Convert uploaded image to base64
+  // Convert uploaded image to base64 with canvas compression
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      setLogo(event.target.result);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 128;
+        const MAX_HEIGHT = 128;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        setLogo(compressedBase64);
+      };
+      img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   };
