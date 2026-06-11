@@ -1,0 +1,395 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  LayoutDashboard, 
+  Users, 
+  CheckSquare, 
+  DollarSign, 
+  Moon, 
+  Sun, 
+  Download, 
+  Upload,
+  Sparkles
+} from 'lucide-react';
+
+// Components
+import Dashboard from './components/Dashboard';
+import ClientManager from './components/ClientManager';
+import TaskManager from './components/TaskManager';
+import FinanceManager from './components/FinanceManager';
+
+const DEFAULT_CLIENTS = [
+  {
+    id: 'c1',
+    name: 'Padaria Pão Quente',
+    logo: '',
+    socialNetwork: 'Instagram',
+    handle: '@padariapaoquente',
+    startDate: '2026-01-10',
+    paymentDay: 10,
+    paymentValue: 1200,
+    weeklyContent: { posts: 3, reels: 1, stories: 7 },
+    paymentStatus: 'paid'
+  },
+  {
+    id: 'c2',
+    name: 'Clínica Sorriso',
+    logo: '',
+    socialNetwork: 'Facebook',
+    handle: '@clinicasorrisoodonto',
+    startDate: '2026-03-05',
+    paymentDay: 5,
+    paymentValue: 2000,
+    weeklyContent: { posts: 4, reels: 2, stories: 5 },
+    paymentStatus: 'overdue'
+  }
+];
+
+const DEFAULT_TASKS = [
+  { id: 't1', title: 'Post Carrossel: Dicas de pães', dayOfWeek: 'Segunda', clientId: 'c1', status: 'completed' },
+  { id: 't2', title: 'Reels: Bastidores da cozinha', dayOfWeek: 'Quarta', clientId: 'c1', status: 'approval' },
+  { id: 't3', title: 'Story informativo: Horário feriado', dayOfWeek: 'Sexta', clientId: 'c1', status: 'todo' },
+  { id: 't4', title: 'Post estático: Prevenção tártaro', dayOfWeek: 'Terça', clientId: 'c2', status: 'pending' },
+  { id: 't5', title: 'Reels: Depoimento de paciente', dayOfWeek: 'Quinta', clientId: 'c2', status: 'urgent' }
+];
+
+const DEFAULT_TRANSACTIONS = [
+  { id: 'tr1', description: 'Assinatura Canva Pro', type: 'outflow', amount: 34.90, date: new Date().toISOString().split('T')[0] },
+  { id: 'tr2', description: 'Assinatura CapCut Pro', type: 'outflow', amount: 49.90, date: new Date().toISOString().split('T')[0] }
+];
+
+export default function App() {
+  const [clients, setClients] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
+  
+  // Shortcut states to trigger child modal forms
+  const [taskManagerRef, setTaskManagerRef] = useState(null);
+  const [clientManagerRef, setClientManagerRef] = useState(null);
+
+  // 1. Initial Load
+  useEffect(() => {
+    // Load theme
+    const savedTheme = localStorage.getItem('socialoom_theme') || 'dark';
+    setTheme(savedTheme);
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // Load data
+    const savedData = localStorage.getItem('socialoom_data');
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        setClients(parsed.clients || []);
+        setTasks(parsed.tasks || []);
+        setTransactions(parsed.transactions || []);
+      } catch (e) {
+        console.error('Erro ao ler localStorage', e);
+        loadDefaultMockData();
+      }
+    } else {
+      loadDefaultMockData();
+    }
+  }, []);
+
+  // 2. Save Data on changes
+  useEffect(() => {
+    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0) {
+      localStorage.setItem('socialoom_data', JSON.stringify({
+        clients,
+        tasks,
+        transactions
+      }));
+    }
+  }, [clients, tasks, transactions]);
+
+  const loadDefaultMockData = () => {
+    setClients(DEFAULT_CLIENTS);
+    setTasks(DEFAULT_TASKS);
+    setTransactions(DEFAULT_TRANSACTIONS);
+  };
+
+  // 3. Theme switch handler
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('socialoom_theme', nextTheme);
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  // 4. Global Action Handlers
+  // Clients CRUD
+  const handleAddClient = (newClient) => {
+    const client = { ...newClient, id: `c_${Date.now()}` };
+    setClients(prev => [...prev, client]);
+  };
+  
+  const handleUpdateClient = (id, updatedClient) => {
+    setClients(prev => prev.map(c => c.id === id ? { ...c, ...updatedClient } : c));
+  };
+  
+  const handleDeleteClient = (id) => {
+    // Delete client
+    setClients(prev => prev.filter(c => c.id !== id));
+    // Remove tasks associated with this client
+    setTasks(prev => prev.filter(t => t.clientId !== id));
+  };
+
+  const handleUpdateClientStatus = (id, newStatus) => {
+    setClients(prev => prev.map(c => c.id === id ? { ...c, paymentStatus: newStatus } : c));
+  };
+
+  // Tasks CRUD
+  const handleAddTask = (newTask) => {
+    const task = { ...newTask, id: `t_${Date.now()}` };
+    setTasks(prev => [...prev, task]);
+  };
+
+  const handleUpdateTask = (id, updatedTask) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updatedTask } : t));
+  };
+
+  const handleUpdateTaskStatus = (id, nextStatus) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: nextStatus } : t));
+  };
+
+  const handleDeleteTask = (id) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+  };
+
+  // Transactions CRUD
+  const handleAddTransaction = (newTransaction) => {
+    const trans = { ...newTransaction, id: `tr_${Date.now()}` };
+    setTransactions(prev => [trans, ...prev]);
+  };
+
+  const handleDeleteTransaction = (id) => {
+    setTransactions(prev => prev.filter(t => t.id !== id));
+  };
+
+  // Backup handlers
+  const handleExportBackup = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(
+      JSON.stringify({ clients, tasks, transactions })
+    );
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `socialoom_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const handleImportBackup = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed.clients || parsed.tasks || parsed.transactions) {
+          setClients(parsed.clients || []);
+          setTasks(parsed.tasks || []);
+          setTransactions(parsed.transactions || []);
+          alert("Backup restaurado com sucesso!");
+        } else {
+          alert("Arquivo de backup inválido.");
+        }
+      } catch (err) {
+        alert("Erro ao decodificar arquivo JSON.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // reset file input
+  };
+
+  // Nav Items Helper
+  const navItems = [
+    { id: 'dashboard', label: 'Painel', icon: <LayoutDashboard size={18} /> },
+    { id: 'clients', label: 'Clientes', icon: <Users size={18} /> },
+    { id: 'tasks', label: 'Tarefas', icon: <CheckSquare size={18} /> },
+    { id: 'finance', label: 'Finanças', icon: <DollarSign size={18} /> },
+  ];
+
+  return (
+    <div className="min-h-screen bg-bg-app text-text-primary flex flex-col md:flex-row">
+      
+      {/* 1. SIDEBAR (Desktop only - md and up) */}
+      <aside className="hidden md:flex flex-col justify-between w-64 glass-panel border-r border-glass-border p-6 fixed h-full z-30">
+        <div className="space-y-8">
+          {/* Logo Brand */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent">Socialoom</h1>
+              <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestor Social Media</span>
+            </div>
+          </div>
+
+          {/* Navigation links */}
+          <nav className="space-y-1">
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setCurrentTab(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${currentTab === item.id ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/10' : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'}`}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Bottom Actions */}
+        <div className="space-y-4 pt-4 border-t border-glass-border">
+          {/* Backup utility */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <button 
+              onClick={handleExportBackup}
+              className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-secondary hover:text-text-primary transition font-semibold cursor-pointer"
+              title="Exportar Backup"
+            >
+              <Download size={14} /> Exportar
+            </button>
+            <label 
+              className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-secondary hover:text-text-primary transition font-semibold cursor-pointer"
+              title="Importar Backup"
+            >
+              <Upload size={14} /> Importar
+              <input type="file" accept=".json" className="hidden" onChange={handleImportBackup} />
+            </label>
+          </div>
+
+          {/* Theme & Profile Panel */}
+          <div className="flex items-center justify-between p-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border">
+            <span className="text-xs font-semibold text-text-secondary ml-1">Tema</span>
+            <button 
+              onClick={toggleTheme}
+              className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary bg-glass-bg border border-glass-border transition cursor-pointer"
+            >
+              {theme === 'dark' ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-indigo-500" />}
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* 2. HEADER BAR (Mobile only - md down) */}
+      <header className="md:hidden glass-panel border-b border-glass-border p-4 sticky top-0 z-40 flex items-center justify-between w-full">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-white shadow shadow-indigo-500/20">
+            <Sparkles size={16} />
+          </div>
+          <div>
+            <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none">Socialoom</h1>
+            <span className="text-[8px] text-text-secondary font-bold uppercase tracking-wider">Gestor</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Quick backup actions */}
+          <button 
+            onClick={handleExportBackup} 
+            className="p-1.5 text-text-secondary hover:text-text-primary cursor-pointer" 
+            title="Exportar Backup"
+          >
+            <Download size={16} />
+          </button>
+          <label className="p-1.5 text-text-secondary hover:text-text-primary cursor-pointer" title="Importar Backup">
+            <Upload size={16} />
+            <input type="file" accept=".json" className="hidden" onChange={handleImportBackup} />
+          </label>
+          <div className="w-px h-4 bg-glass-border mx-1"></div>
+          
+          {/* Theme switcher */}
+          <button 
+            onClick={toggleTheme}
+            className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5 transition cursor-pointer"
+          >
+            {theme === 'dark' ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-indigo-500" />}
+          </button>
+        </div>
+      </header>
+
+      {/* 3. MAIN WORKSPACE */}
+      <main className="flex-1 md:ml-64 p-4 md:p-8 pb-20 md:pb-8 max-w-7xl">
+        {currentTab === 'dashboard' && (
+          <Dashboard 
+            clients={clients}
+            tasks={tasks}
+            onNavigate={setCurrentTab}
+            onAddClient={() => {
+              setCurrentTab('clients');
+              // Let child manager trigger modal open (automatically open on mount if clients tab handles it, or we can handle it via a direct toggle)
+              setTimeout(() => {
+                const btn = document.querySelector('button[class*="bg-indigo-500"]');
+                if (btn) btn.click();
+              }, 100);
+            }}
+            onAddTask={() => {
+              setCurrentTab('tasks');
+              setTimeout(() => {
+                const btn = document.querySelector('button[class*="bg-indigo-500"]');
+                if (btn) btn.click();
+              }, 100);
+            }}
+            onUpdateTaskStatus={handleUpdateTaskStatus}
+          />
+        )}
+
+        {currentTab === 'clients' && (
+          <ClientManager 
+            clients={clients}
+            onAddClient={handleAddClient}
+            onUpdateClient={handleUpdateClient}
+            onDeleteClient={handleDeleteClient}
+          />
+        )}
+
+        {currentTab === 'tasks' && (
+          <TaskManager 
+            tasks={tasks}
+            clients={clients}
+            onAddTask={handleAddTask}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={handleDeleteTask}
+          />
+        )}
+
+        {currentTab === 'finance' && (
+          <FinanceManager 
+            clients={clients}
+            transactions={transactions}
+            onUpdateClientStatus={handleUpdateClientStatus}
+            onAddTransaction={handleAddTransaction}
+            onDeleteTransaction={handleDeleteTransaction}
+          />
+        )}
+      </main>
+
+      {/* 4. BOTTOM NAVIGATION BAR (Mobile only - md down) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-glass-border p-2 px-6 flex justify-between items-center rounded-t-2xl">
+        {navItems.map(item => (
+          <button
+            key={item.id}
+            onClick={() => setCurrentTab(item.id)}
+            className={`flex flex-col items-center gap-1 py-1 px-3 transition cursor-pointer ${currentTab === item.id ? 'text-indigo-500' : 'text-text-secondary'}`}
+          >
+            {item.icon}
+            <span className="text-[9px] font-bold uppercase">{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

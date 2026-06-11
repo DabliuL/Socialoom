@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  
+  /* Cores de Tema mapeadas para variáveis CSS */
+  --color-bg-app: var(--bg-app);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-accent-color: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  
+  /* Cores específicas de Status de Tarefas */
+  --color-status-todo: #3b82f6;      /* Azul */
+  --color-status-pending: #d97706;   /* Amarelo escuro / Amber para contraste */
+  --color-status-approval: #ea580c;  /* Laranja */
+  --color-status-urgent: #ef4444;    /* Vermelho */
+  --color-status-completed: #10b981; /* Verde Claro */
+}
+
+@layer base {
+  :root {
+    /* MODO CLARO */
+    --bg-app: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(15, 23, 42, 0.08);
+    --glass-shadow: rgba(0, 0, 0, 0.05);
+    --card-bg: #ffffff;
+    --card-border: rgba(15, 23, 42, 0.06);
+    --accent: #6366f1; /* Indigo */
+    --accent-hover: #4f46e5;
+  }
+
+  :root.dark {
+    /* MODO ESCURO */
+    --bg-app: #030712;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --glass-bg: rgba(17, 24, 39, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: rgba(0, 0, 0, 0.3);
+    --card-bg: rgba(30, 41, 59, 0.4);
+    --card-border: rgba(255, 255, 255, 0.05);
+    --accent: #818cf8; /* Light Indigo */
+    --accent-hover: #6366f1;
+  }
+
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-family: var(--font-sans);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+  }
+}
+
+/* Painel com Efeito de Vidro */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
+}
+
+/* Ocultar barra de rolagem mas permitir scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Scrollbar personalizada sutil */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.15);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
