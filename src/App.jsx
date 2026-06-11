@@ -350,7 +350,11 @@ export default function App() {
           {/* Logo Brand & Close button */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5">
-              <img src={logoImg} alt="Loom Social" className="h-10 w-auto rounded-xl object-contain bg-white p-1 border border-glass-border shadow-sm" />
+              <img src={logoImg} alt="Logo" className="w-9 h-9 rounded-xl object-cover bg-white p-0.5 border border-glass-border shadow-md" />
+              <div>
+                <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none mb-1">Socialoom</h1>
+                <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestor Social Media</span>
+              </div>
             </div>
             
             {/* Close Button */}
@@ -416,7 +420,13 @@ export default function App() {
             <Menu size={20} />
           </button>
           
-          <img src={logoImg} alt="Loom Social" className="h-8 w-auto rounded-lg object-contain bg-white p-0.5 border border-glass-border shadow-xs" />
+          <div className="flex items-center gap-2">
+            <img src={logoImg} alt="Logo" className="w-7 h-7 rounded-lg object-cover bg-white p-0.5 border border-glass-border shadow-sm" />
+            <div>
+              <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none">Socialoom</h1>
+              <span className="text-[8px] text-text-secondary font-bold uppercase tracking-wider leading-none">Gestor</span>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
