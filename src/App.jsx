@@ -352,7 +352,8 @@ export default function App() {
             <div className="flex items-center gap-2.5">
               <img src={logoImg} alt="Logo" className="w-9 h-9 rounded-xl object-cover bg-white p-0.5 border border-glass-border shadow-md" />
               <div>
-                <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none">Socialoom</h1>
+                <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-amber-500 to-yellow-300 bg-clip-text text-transparent leading-none mb-1">Socialoom</h1>
+                <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestão de Mídias</span>
               </div>
             </div>
             
@@ -374,7 +375,7 @@ export default function App() {
                   setCurrentTab(item.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${currentTab === item.id ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/10' : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition cursor-pointer ${currentTab === item.id ? 'bg-indigo-500 text-black shadow-lg shadow-indigo-500/15' : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'}`}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -413,7 +414,7 @@ export default function App() {
           {/* Hamburger Menu Button (prominent style) */}
           <button 
             onClick={() => setIsSidebarOpen(true)}
-            className="p-1.5 rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 transition cursor-pointer flex items-center justify-center shadow-md shadow-indigo-500/10"
+            className="p-1.5 rounded-lg bg-indigo-500 text-black hover:bg-indigo-600 transition cursor-pointer flex items-center justify-center shadow-md shadow-indigo-500/15"
             title="Abrir Menu"
           >
             <Menu size={20} />
@@ -422,7 +423,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="Logo" className="w-7 h-7 rounded-lg object-cover bg-white p-0.5 border border-glass-border shadow-sm" />
             <div>
-              <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none">Socialoom</h1>
+              <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-amber-500 to-yellow-300 bg-clip-text text-transparent leading-none">Socialoom</h1>
             </div>
           </div>
         </div>
@@ -546,7 +547,7 @@ export default function App() {
             <div className="flex flex-col gap-2 pt-1">
               <button 
                 onClick={handleDownloadBackup}
-                className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold transition cursor-pointer text-xs shadow-md shadow-indigo-500/10"
+                className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-black font-semibold transition cursor-pointer text-xs shadow-md shadow-indigo-500/15"
               >
                 <Download size={14} /> Baixar Arquivo JSON (PC/Web)
               </button>
@@ -598,7 +599,7 @@ export default function App() {
                 />
                 <button 
                   onClick={handleImportTextBackup}
-                  className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-xl transition cursor-pointer text-xs shadow-lg shadow-indigo-500/10"
+                  className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-black font-bold rounded-xl transition cursor-pointer text-xs shadow-lg shadow-indigo-500/15"
                 >
                   Restaurar via Código
                 </button>

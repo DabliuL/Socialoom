@@ -104,10 +104,10 @@ export default function Dashboard({
   const getStatusColor = (status) => {
     switch (status) {
       case 'todo': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'pending': return 'bg-amber-500/20 text-amber-500 border-amber-500/30';
+      case 'pending': return 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30';
       case 'approval': return 'bg-orange-500/20 text-orange-500 border-orange-500/30';
       case 'urgent': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'completed': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+      case 'completed': return 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30';
       default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
     }
   };
@@ -140,7 +140,7 @@ export default function Dashboard({
               />
               <button 
                 type="submit" 
-                className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-xs px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                className="bg-indigo-500 hover:bg-indigo-600 text-black font-semibold text-xs px-2.5 py-1.5 rounded-lg transition cursor-pointer"
               >
                 Salvar
               </button>
@@ -266,7 +266,7 @@ export default function Dashboard({
                 </div>
                 <button 
                   onClick={onAddTask}
-                  className="mt-2 text-xs bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition flex items-center gap-1 cursor-pointer"
+                  className="mt-2 text-xs bg-indigo-500 text-black font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition flex items-center gap-1 cursor-pointer"
                 >
                   <Plus size={14} /> Adicionar Tarefa
                 </button>

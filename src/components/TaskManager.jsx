@@ -79,10 +79,10 @@ export default function TaskManager({
   const getStatusColumnColor = (s) => {
     switch (s) {
       case 'todo': return 'border-blue-500/20 bg-blue-500/[0.02] text-blue-500';
-      case 'pending': return 'border-amber-500/20 bg-amber-500/[0.02] text-amber-500';
+      case 'pending': return 'border-yellow-500/20 bg-yellow-500/[0.02] text-yellow-600 dark:text-yellow-400';
       case 'approval': return 'border-orange-500/20 bg-orange-500/[0.02] text-orange-500';
       case 'urgent': return 'border-red-500/20 bg-red-500/[0.02] text-red-400';
-      case 'completed': return 'border-emerald-500/20 bg-emerald-500/[0.02] text-emerald-500';
+      case 'completed': return 'border-green-500/20 bg-green-500/[0.02] text-green-600 dark:text-green-400';
       default: return 'border-glass-border bg-black/5 text-text-secondary';
     }
   };
@@ -101,10 +101,10 @@ export default function TaskManager({
   const getStatusBadgeColor = (s) => {
     switch (s) {
       case 'todo': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-      case 'pending': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+      case 'pending': return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
       case 'approval': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
       case 'urgent': return 'bg-red-500/10 text-red-400 border-red-500/20';
-      case 'completed': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'completed': return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
       default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
@@ -138,7 +138,7 @@ export default function TaskManager({
         </div>
         <button
           onClick={() => openAddModal(activeMobileStatus)}
-          className="flex items-center gap-1.5 bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
+          className="flex items-center gap-1.5 bg-indigo-500 text-black font-bold px-4 py-2.5 rounded-xl hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
         >
           <Plus size={18} /> Nova Tarefa
         </button>
@@ -213,7 +213,7 @@ export default function TaskManager({
             <button
               key={st}
               onClick={() => setActiveMobileStatus(st)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${activeMobileStatus === st ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-black/5 dark:bg-white/5 text-text-secondary border-glass-border'}`}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer ${activeMobileStatus === st ? 'bg-indigo-500 text-black border-indigo-500' : 'bg-black/5 dark:bg-white/5 text-text-secondary border-glass-border'}`}
             >
               {getStatusLabel(st)}
             </button>
@@ -411,17 +411,17 @@ export default function TaskManager({
               className="w-full px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50 cursor-pointer"
             >
               <option value="todo" className="bg-slate-100 dark:bg-slate-900 text-blue-500">A Fazer</option>
-              <option value="pending" className="bg-slate-100 dark:bg-slate-900 text-amber-500">Pendente</option>
+              <option value="pending" className="bg-slate-100 dark:bg-slate-900 text-yellow-600 dark:text-yellow-400">Pendente</option>
               <option value="approval" className="bg-slate-100 dark:bg-slate-900 text-orange-500">Em Aprovação</option>
               <option value="urgent" className="bg-slate-100 dark:bg-slate-900 text-red-500">Urgente</option>
-              <option value="completed" className="bg-slate-100 dark:bg-slate-900 text-emerald-500">Concluído</option>
+              <option value="completed" className="bg-slate-100 dark:bg-slate-900 text-green-600 dark:text-green-400">Concluído</option>
             </select>
           </div>
 
           <div className="flex gap-3 pt-3 border-t border-glass-border">
             <button
               type="submit"
-              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/10 cursor-pointer"
+              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-black font-bold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/15 cursor-pointer"
             >
               {selectedTask ? "Salvar Alterações" : "Criar Tarefa"}
             </button>

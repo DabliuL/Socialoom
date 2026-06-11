@@ -183,7 +183,7 @@ export default function ClientManager({
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-1.5 bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
+          className="flex items-center gap-1.5 bg-indigo-500 text-black font-bold px-4 py-2.5 rounded-xl hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
         >
           <Plus size={18} /> Cadastrar Cliente
         </button>
@@ -201,7 +201,7 @@ export default function ClientManager({
               </div>
               <button
                 onClick={openAddModal}
-                className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-4 py-2 rounded-xl transition cursor-pointer"
+                className="bg-indigo-500 hover:bg-indigo-600 text-black font-bold px-4 py-2 rounded-xl transition cursor-pointer"
               >
                 Cadastrar Agora
               </button>
@@ -490,7 +490,7 @@ export default function ClientManager({
           <div className="flex gap-3 pt-3 border-t border-glass-border">
             <button
               type="submit"
-              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/10 cursor-pointer"
+              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-black font-bold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/15 cursor-pointer"
             >
               {selectedClient ? "Salvar Alterações" : "Cadastrar Cliente"}
             </button>

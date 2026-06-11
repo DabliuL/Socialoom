@@ -94,8 +94,8 @@ export default function AgendaManager({
       case 'Reunião':
         return { 
           icon: <Users size={14} />, 
-          badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-          indicator: 'bg-indigo-500'
+          badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+          indicator: 'bg-blue-500'
         };
       case 'Publicação':
         return { 
@@ -198,7 +198,7 @@ export default function AgendaManager({
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-1.5 bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
+          className="flex items-center gap-1.5 bg-indigo-500 text-black font-bold px-4 py-2.5 rounded-xl hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
         >
           <Plus size={18} /> Novo Evento
         </button>
@@ -224,7 +224,7 @@ export default function AgendaManager({
                 <button
                   key={t}
                   onClick={() => setFilterType(t)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${filterType === t ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-black/5 dark:bg-white/5 text-text-secondary border-glass-border'}`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer ${filterType === t ? 'bg-indigo-500 text-black border-indigo-500' : 'bg-black/5 dark:bg-white/5 text-text-secondary border-glass-border'}`}
                 >
                   {t === 'all' ? 'Todos' : t}
                 </button>
@@ -245,7 +245,7 @@ export default function AgendaManager({
             </div>
             <button
               onClick={openAddModal}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-4 py-2 rounded-xl transition cursor-pointer"
+              className="bg-indigo-500 hover:bg-indigo-600 text-black font-bold px-4 py-2 rounded-xl transition cursor-pointer"
             >
               Criar Primeiro Evento
             </button>
@@ -429,7 +429,7 @@ export default function AgendaManager({
           <div className="flex gap-3 pt-3 border-t border-glass-border">
             <button
               type="submit"
-              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/10 cursor-pointer"
+              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-black font-bold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/15 cursor-pointer"
             >
               {selectedReminder ? "Salvar Evento" : "Agendar Evento"}
             </button>

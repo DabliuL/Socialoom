@@ -351,7 +351,7 @@ export default function FinanceManager({
           <div className="flex gap-3 pt-3 border-t border-glass-border">
             <button
               type="submit"
-              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/10 cursor-pointer"
+              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-black font-bold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/15 cursor-pointer"
             >
               Registrar Lançamento
             </button>
