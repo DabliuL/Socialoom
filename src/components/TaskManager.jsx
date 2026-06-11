@@ -4,12 +4,11 @@ import {
   Trash2, 
   Edit2, 
   Filter, 
-  CheckCircle,
   Calendar,
-  Layers,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  CheckCircle2
 } from 'lucide-react';
 import Modal from './Modal';
 
@@ -31,23 +30,20 @@ export default function TaskManager({
 
   // Filters State
   const [filterClient, setFilterClient] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterWeekday, setFilterWeekday] = useState('all');
 
-  // Mobile View Active Day (Default: Today's weekday)
   const weekdays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
-  const getTodayIndex = () => {
-    const day = new Date().getDay(); // 0 is Sunday, 1 is Monday...
-    const indexMap = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6 };
-    return indexMap[day] ?? 0;
-  };
-  const [activeMobileDay, setActiveMobileDay] = useState(weekdays[getTodayIndex()]);
+  const statuses = ['todo', 'pending', 'approval', 'urgent', 'completed'];
 
-  const openAddModal = (day = 'Segunda') => {
+  // Mobile View Active Status Tab (Default: todo)
+  const [activeMobileStatus, setActiveMobileStatus] = useState('todo');
+
+  const openAddModal = (colStatus = 'todo') => {
     setSelectedTask(null);
     setTitle('');
-    setDayOfWeek(day);
+    setDayOfWeek('Segunda');
     setClientId('');
-    setStatus('todo');
+    setStatus(colStatus);
     setIsModalOpen(true);
   };
 
@@ -55,9 +51,9 @@ export default function TaskManager({
     e.stopPropagation();
     setSelectedTask(task);
     setTitle(task.title);
-    setDayOfWeek(task.dayOfWeek);
+    setDayOfWeek(task.dayOfWeek || 'Segunda');
     setClientId(task.clientId || '');
-    setStatus(task.status);
+    setStatus(task.status || 'todo');
     setIsModalOpen(true);
   };
 
@@ -80,14 +76,14 @@ export default function TaskManager({
     setIsModalOpen(false);
   };
 
-  const getStatusColor = (s) => {
+  const getStatusColumnColor = (s) => {
     switch (s) {
-      case 'todo': return 'bg-blue-500/15 text-blue-500 border-blue-500/25';
-      case 'pending': return 'bg-amber-500/15 text-amber-500 border-amber-500/25';
-      case 'approval': return 'bg-orange-500/15 text-orange-500 border-orange-500/25';
-      case 'urgent': return 'bg-red-500/15 text-red-400 border-red-500/25';
-      case 'completed': return 'bg-emerald-500/15 text-emerald-500 border-emerald-500/25';
-      default: return 'bg-slate-500/15 text-slate-400 border-slate-500/25';
+      case 'todo': return 'border-blue-500/20 bg-blue-500/[0.02] text-blue-500';
+      case 'pending': return 'border-amber-500/20 bg-amber-500/[0.02] text-amber-500';
+      case 'approval': return 'border-orange-500/20 bg-orange-500/[0.02] text-orange-500';
+      case 'urgent': return 'border-red-500/20 bg-red-500/[0.02] text-red-400';
+      case 'completed': return 'border-emerald-500/20 bg-emerald-500/[0.02] text-emerald-500';
+      default: return 'border-glass-border bg-black/5 text-text-secondary';
     }
   };
 
@@ -99,6 +95,17 @@ export default function TaskManager({
       case 'urgent': return 'Urgente';
       case 'completed': return 'Concluído';
       default: return s;
+    }
+  };
+
+  const getStatusBadgeColor = (s) => {
+    switch (s) {
+      case 'todo': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      case 'pending': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+      case 'approval': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+      case 'urgent': return 'bg-red-500/10 text-red-400 border-red-500/20';
+      case 'completed': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
 
@@ -117,8 +124,8 @@ export default function TaskManager({
   // Filter Tasks
   const filteredTasks = tasks.filter(task => {
     const matchClient = filterClient === 'all' || task.clientId === filterClient;
-    const matchStatus = filterStatus === 'all' || task.status === filterStatus;
-    return matchClient && matchStatus;
+    const matchWeekday = filterWeekday === 'all' || task.dayOfWeek === filterWeekday;
+    return matchClient && matchWeekday;
   });
 
   return (
@@ -126,11 +133,11 @@ export default function TaskManager({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-text-primary">Gerenciador de Tarefas</h2>
-          <p className="text-text-secondary text-sm">Organize suas demandas de publicações divididas pelos dias da semana.</p>
+          <h2 className="text-2xl font-bold tracking-tight text-text-primary">Quadro de Tarefas</h2>
+          <p className="text-text-secondary text-sm">Gerencie o fluxo de aprovação e execução dos seus conteúdos.</p>
         </div>
         <button
-          onClick={() => openAddModal(activeMobileDay)}
+          onClick={() => openAddModal(activeMobileStatus)}
           className="flex items-center gap-1.5 bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
         >
           <Plus size={18} /> Nova Tarefa
@@ -157,44 +164,42 @@ export default function TaskManager({
             ))}
           </select>
 
-          {/* Status Filter */}
+          {/* Weekday Filter */}
           <select 
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            value={filterWeekday}
+            onChange={(e) => setFilterWeekday(e.target.value)}
             className="px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-xs text-text-primary outline-none focus:border-indigo-500/50 cursor-pointer"
           >
-            <option value="all">Todos os Status</option>
-            <option value="todo">A Fazer</option>
-            <option value="pending">Pendente</option>
-            <option value="approval">Em Aprovação</option>
-            <option value="urgent">Urgente</option>
-            <option value="completed">Concluído</option>
+            <option value="all">Qualquer Dia</option>
+            {weekdays.map(day => (
+              <option key={day} value={day}>{day}</option>
+            ))}
           </select>
         </div>
       </div>
 
-      {/* MOBILE WEEK TABS (Screens < md) */}
+      {/* MOBILE STATUS TABS (Screens < md) */}
       <div className="block md:hidden space-y-4">
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between bg-black/5 dark:bg-white/5 border border-glass-border rounded-xl p-1">
+        <div className={`flex items-center justify-between border rounded-xl p-1 ${getStatusColumnColor(activeMobileStatus)}`}>
           <button 
             onClick={() => {
-              const currentIdx = weekdays.indexOf(activeMobileDay);
-              const prevIdx = currentIdx === 0 ? 6 : currentIdx - 1;
-              setActiveMobileDay(weekdays[prevIdx]);
+              const currentIdx = statuses.indexOf(activeMobileStatus);
+              const prevIdx = currentIdx === 0 ? statuses.length - 1 : currentIdx - 1;
+              setActiveMobileStatus(statuses[prevIdx]);
             }}
             className="p-2 text-text-secondary hover:text-text-primary cursor-pointer"
           >
             <ChevronLeft size={20} />
           </button>
           
-          <span className="font-bold text-sm text-text-primary">{activeMobileDay}</span>
+          <span className="font-bold text-sm text-text-primary">{getStatusLabel(activeMobileStatus)}</span>
           
           <button 
             onClick={() => {
-              const currentIdx = weekdays.indexOf(activeMobileDay);
-              const nextIdx = currentIdx === 6 ? 0 : currentIdx + 1;
-              setActiveMobileDay(weekdays[nextIdx]);
+              const currentIdx = statuses.indexOf(activeMobileStatus);
+              const nextIdx = currentIdx === statuses.length - 1 ? 0 : currentIdx + 1;
+              setActiveMobileStatus(statuses[nextIdx]);
             }}
             className="p-2 text-text-secondary hover:text-text-primary cursor-pointer"
           >
@@ -204,39 +209,39 @@ export default function TaskManager({
 
         {/* Quick select buttons */}
         <div className="flex gap-1 overflow-x-auto pb-2 no-scrollbar">
-          {weekdays.map(day => (
+          {statuses.map(st => (
             <button
-              key={day}
-              onClick={() => setActiveMobileDay(day)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${activeMobileDay === day ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-black/5 dark:bg-white/5 text-text-secondary border-glass-border'}`}
+              key={st}
+              onClick={() => setActiveMobileStatus(st)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${activeMobileStatus === st ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-black/5 dark:bg-white/5 text-text-secondary border-glass-border'}`}
             >
-              {day.substring(0, 3)}
+              {getStatusLabel(st)}
             </button>
           ))}
         </div>
 
-        {/* Mobile tasks list for activeMobileDay */}
+        {/* Mobile tasks list for activeMobileStatus */}
         <div className="glass-panel p-4 rounded-2xl min-h-[300px] space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-glass-border">
-            <span className="font-bold text-xs text-text-secondary uppercase">{activeMobileDay}</span>
+            <span className="font-bold text-xs text-text-secondary uppercase">{getStatusLabel(activeMobileStatus)}</span>
             <button
-              onClick={() => openAddModal(activeMobileDay)}
+              onClick={() => openAddModal(activeMobileStatus)}
               className="p-1 rounded bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 transition cursor-pointer"
-              title="Nova tarefa"
+              title="Nova tarefa nesta coluna"
             >
               <Plus size={14} />
             </button>
           </div>
 
           <div className="space-y-2.5">
-            {filteredTasks.filter(t => t.dayOfWeek === activeMobileDay).length === 0 ? (
+            {filteredTasks.filter(t => t.status === activeMobileStatus).length === 0 ? (
               <div className="py-12 text-center text-text-secondary text-xs flex flex-col items-center gap-2">
                 <Sparkles size={24} className="text-indigo-500/40" />
-                <p>Nenhuma demanda agendada para hoje.</p>
+                <p>Nenhuma tarefa nesta etapa do fluxo.</p>
               </div>
             ) : (
               filteredTasks
-                .filter(t => t.dayOfWeek === activeMobileDay)
+                .filter(t => t.status === activeMobileStatus)
                 .map(task => {
                   const client = clients.find(c => c.id === task.clientId);
                   return (
@@ -262,8 +267,9 @@ export default function TaskManager({
                           <span className="text-[10px] text-text-secondary font-medium">Geral</span>
                         )}
 
-                        <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${getStatusColor(task.status)}`}>
-                          {getStatusLabel(task.status)}
+                        <span className="px-2 py-0.5 rounded-full border border-glass-border bg-black/5 dark:bg-white/5 text-[10px] font-semibold text-text-secondary flex items-center gap-1">
+                          <Calendar size={10} className="text-indigo-500" />
+                          {task.dayOfWeek || 'Segunda'}
                         </span>
                       </div>
                     </div>
@@ -274,28 +280,28 @@ export default function TaskManager({
         </div>
       </div>
 
-      {/* DESKTOP WEEK BOARD (Screens >= md) */}
+      {/* DESKTOP STATUS KANBAN BOARD (Screens >= md) */}
       <div className="hidden md:flex gap-4 overflow-x-auto pb-4 no-scrollbar items-start">
-        {weekdays.map(day => {
-          const dayTasks = filteredTasks.filter(t => t.dayOfWeek === day);
+        {statuses.map(st => {
+          const statusTasks = filteredTasks.filter(t => t.status === st);
           return (
             <div 
-              key={day}
-              className="flex-shrink-0 w-72 glass-panel p-4 rounded-2xl flex flex-col max-h-[550px] overflow-hidden"
+              key={st}
+              className={`flex-shrink-0 w-72 glass-panel p-4 rounded-2xl flex flex-col max-h-[550px] overflow-hidden border-t-2 ${getStatusColumnColor(st).split(' ')[0]}`}
             >
               <div className="flex items-center justify-between pb-3 border-b border-glass-border">
-                <span className="font-bold text-xs text-text-secondary uppercase tracking-wider">{day}</span>
-                <span className="text-[10px] font-bold bg-indigo-500/10 text-indigo-500 px-1.5 py-0.5 rounded-full border border-indigo-500/10">{dayTasks.length}</span>
+                <span className="font-bold text-xs text-text-secondary uppercase tracking-wider">{getStatusLabel(st)}</span>
+                <span className="text-[10px] font-bold bg-indigo-500/10 text-indigo-500 px-1.5 py-0.5 rounded-full border border-indigo-500/10">{statusTasks.length}</span>
               </div>
 
               {/* Tasks scroll container */}
               <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 mt-3 pr-0.5 py-1">
-                {dayTasks.length === 0 ? (
+                {statusTasks.length === 0 ? (
                   <div className="py-8 text-center text-text-secondary/70 text-xs border border-dashed border-glass-border rounded-xl bg-black/5 dark:bg-white/5">
                     Sem tarefas
                   </div>
                 ) : (
-                  dayTasks.map(task => {
+                  statusTasks.map(task => {
                     const client = clients.find(c => c.id === task.clientId);
                     return (
                       <div 
@@ -324,8 +330,9 @@ export default function TaskManager({
                             <span className="text-[10px] text-text-secondary font-medium">Geral</span>
                           )}
 
-                          <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${getStatusColor(task.status)}`}>
-                            {getStatusLabel(task.status)}
+                          <span className="px-2 py-0.5 rounded-full border border-glass-border bg-black/5 dark:bg-white/5 text-[9px] font-semibold text-text-secondary flex items-center gap-1">
+                            <Calendar size={10} className="text-indigo-500" />
+                            {task.dayOfWeek || 'Segunda'}
                           </span>
                         </div>
                       </div>
@@ -336,7 +343,7 @@ export default function TaskManager({
 
               {/* Add task shortcut bottom */}
               <button
-                onClick={() => openAddModal(day)}
+                onClick={() => openAddModal(st)}
                 className="mt-3 py-2 bg-black/5 dark:bg-white/5 border border-dashed border-glass-border hover:border-indigo-500/50 hover:bg-indigo-500/5 text-text-secondary hover:text-indigo-500 font-semibold rounded-xl flex items-center justify-center gap-1 transition text-xs cursor-pointer"
               >
                 <Plus size={14} /> Adicionar
@@ -397,17 +404,17 @@ export default function TaskManager({
 
           {/* Status */}
           <div className="space-y-1">
-            <label className="block font-bold text-text-secondary text-xs uppercase">Status Inicial</label>
+            <label className="block font-bold text-text-secondary text-xs uppercase">Status / Etapa</label>
             <select 
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50 cursor-pointer"
             >
-              <option value="todo" className="bg-slate-100 dark:bg-slate-900 text-blue-500">A Fazer (Azul)</option>
-              <option value="pending" className="bg-slate-100 dark:bg-slate-900 text-amber-500">Pendente (Amarelo)</option>
-              <option value="approval" className="bg-slate-100 dark:bg-slate-900 text-orange-500">Em Aprovação (Laranja)</option>
-              <option value="urgent" className="bg-slate-100 dark:bg-slate-900 text-red-500">Urgente (Vermelho)</option>
-              <option value="completed" className="bg-slate-100 dark:bg-slate-900 text-emerald-500">Concluído (Verde Claro)</option>
+              <option value="todo" className="bg-slate-100 dark:bg-slate-900 text-blue-500">A Fazer</option>
+              <option value="pending" className="bg-slate-100 dark:bg-slate-900 text-amber-500">Pendente</option>
+              <option value="approval" className="bg-slate-100 dark:bg-slate-900 text-orange-500">Em Aprovação</option>
+              <option value="urgent" className="bg-slate-100 dark:bg-slate-900 text-red-500">Urgente</option>
+              <option value="completed" className="bg-slate-100 dark:bg-slate-900 text-emerald-500">Concluído</option>
             </select>
           </div>
 

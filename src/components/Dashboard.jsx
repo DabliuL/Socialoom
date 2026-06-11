@@ -17,6 +17,8 @@ import SocialIcon from './SocialIcon';
 export default function Dashboard({ 
   clients = [], 
   tasks = [], 
+  reminders = [],
+  onToggleReminderCompleted,
   userName = 'Social Media',
   onUpdateUserName,
   onNavigate, 
@@ -300,48 +302,95 @@ export default function Dashboard({
           </div>
         </div>
 
-        {/* Column 3: Pending Payments */}
-        <div className="glass-panel p-5 rounded-2xl space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <DollarSign className="text-indigo-500" size={20} />
-              <h3 className="text-lg font-bold tracking-tight text-text-primary">Avisos de Cobrança</h3>
-            </div>
-            <button 
-              onClick={() => onNavigate('finance')}
-              className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1 transition cursor-pointer"
-            >
-              Finanças <ArrowRight size={14} />
-            </button>
-          </div>
-
-          <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1 no-scrollbar">
-            {overdueClients.length === 0 ? (
-              <div className="py-12 text-center text-text-secondary flex flex-col items-center justify-center gap-2">
-                <AlertCircle size={36} className="text-emerald-500/60" />
-                <p className="font-semibold text-sm">Pagamentos em dia!</p>
-                <p className="text-xs">Nenhum cliente com pagamento atrasado.</p>
+        {/* Column 3: Agenda & Alertas (Right Panel) */}
+        <div className="lg:col-span-1 flex flex-col gap-6">
+          {/* Today's Reminders */}
+          <div className="glass-panel p-5 rounded-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="text-indigo-500" size={20} />
+                <h3 className="text-lg font-bold tracking-tight text-text-primary">Agenda de Hoje</h3>
               </div>
-            ) : (
-              overdueClients.map(client => (
-                <div 
-                  key={client.id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    {renderClientLogo(client)}
-                    <div>
-                      <p className="text-sm font-semibold text-text-primary">{client.name}</p>
-                      <p className="text-xs text-red-400">Venceu dia {client.paymentDay}</p>
+              <button 
+                onClick={() => onNavigate('agenda')}
+                className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1 transition cursor-pointer"
+              >
+                Ver tudo <ArrowRight size={14} />
+              </button>
+            </div>
+
+            <div className="space-y-2.5 max-h-[180px] overflow-y-auto pr-1 no-scrollbar">
+              {todayReminders.length === 0 ? (
+                <div className="py-6 text-center text-text-secondary text-xs flex flex-col items-center justify-center gap-2">
+                  <AlertCircle size={24} className="text-indigo-500/30" />
+                  <p>Sem compromissos hoje.</p>
+                </div>
+              ) : (
+                todayReminders.map(rem => (
+                  <div 
+                    key={rem.id} 
+                    className={`flex items-center justify-between p-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border transition ${rem.completed ? 'opacity-65' : ''}`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <input 
+                        type="checkbox" 
+                        checked={rem.completed} 
+                        onChange={() => onToggleReminderCompleted(rem.id)}
+                        className="w-4 h-4 rounded border-glass-border bg-black/10 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-500"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-xs font-semibold text-text-primary truncate ${rem.completed ? 'line-through text-text-secondary' : ''}`}>{rem.title}</p>
+                        <span className="text-[10px] text-text-secondary">{rem.time || 'Sem hora'} | {rem.type}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-text-primary">{formatCurrency(client.paymentValue)}</p>
-                    <span className="text-[10px] font-bold text-red-400 uppercase">Atrasado</span>
-                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Pending Payments */}
+          <div className="glass-panel p-5 rounded-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <DollarSign className="text-indigo-500" size={20} />
+                <h3 className="text-lg font-bold tracking-tight text-text-primary">Avisos de Cobrança</h3>
+              </div>
+              <button 
+                onClick={() => onNavigate('finance')}
+                className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1 transition cursor-pointer"
+              >
+                Finanças <ArrowRight size={14} />
+              </button>
+            </div>
+
+            <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1 no-scrollbar">
+              {overdueClients.length === 0 ? (
+                <div className="py-6 text-center text-text-secondary flex flex-col items-center justify-center gap-2">
+                  <CheckCircle2 size={24} className="text-emerald-500/60" />
+                  <p className="text-xs font-semibold">Tudo em dia!</p>
                 </div>
-              ))
-            )}
+              ) : (
+                overdueClients.map(client => (
+                  <div 
+                    key={client.id}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 transition"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {renderClientLogo(client)}
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-text-primary truncate">{client.name}</p>
+                        <p className="text-[10px] text-red-400">Venceu dia {client.paymentDay}</p>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-xs font-bold text-text-primary">{formatCurrency(client.paymentValue)}</p>
+                      <span className="text-[9px] font-bold text-red-400 uppercase">Atrasado</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>

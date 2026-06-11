@@ -10,7 +10,8 @@ import {
   Upload,
   Sparkles,
   Menu,
-  X
+  X,
+  Calendar
 } from 'lucide-react';
 
 // Components
@@ -18,6 +19,7 @@ import Dashboard from './components/Dashboard';
 import ClientManager from './components/ClientManager';
 import TaskManager from './components/TaskManager';
 import FinanceManager from './components/FinanceManager';
+import AgendaManager from './components/AgendaManager';
 
 const DEFAULT_CLIENTS = [
   {
@@ -59,10 +61,16 @@ const DEFAULT_TRANSACTIONS = [
   { id: 'tr2', description: 'Assinatura CapCut Pro', type: 'outflow', amount: 49.90, date: new Date().toISOString().split('T')[0] }
 ];
 
+const DEFAULT_REMINDERS = [
+  { id: 'rem1', title: 'Captação de Reels - Padaria Pão Quente', date: new Date().toISOString().split('T')[0], time: '14:00', clientId: 'c1', type: 'Captação', notes: 'Levar tripé, luzes e estabilizador de celular.', completed: false },
+  { id: 'rem2', title: 'Reunião de Briefing - Sorriso', date: new Date().toISOString().split('T')[0], time: '10:00', clientId: 'c2', type: 'Reunião', notes: 'Definir posts da próxima semana e alinhar datas de aprovação.', completed: false }
+];
+
 export default function App() {
   const [clients, setClients] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [reminders, setReminders] = useState([]);
   const [userName, setUserName] = useState('Social Media');
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
@@ -92,6 +100,7 @@ export default function App() {
         setTasks(parsed.tasks || []);
         setTransactions(parsed.transactions || []);
         setUserName(parsed.userName || 'Social Media');
+        setReminders(parsed.reminders || []);
       } catch (e) {
         console.error('Erro ao ler localStorage', e);
         loadDefaultMockData();
@@ -103,24 +112,26 @@ export default function App() {
 
   // 2. Save Data on changes
   useEffect(() => {
-    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0 || userName !== 'Social Media') {
+    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0 || reminders.length > 0 || userName !== 'Social Media') {
       try {
         localStorage.setItem('socialoom_data', JSON.stringify({
           clients,
           tasks,
           transactions,
-          userName
+          userName,
+          reminders
         }));
       } catch (err) {
         console.error('Erro ao salvar dados no localStorage (cota excedida?):', err);
       }
     }
-  }, [clients, tasks, transactions, userName]);
+  }, [clients, tasks, transactions, userName, reminders]);
 
   const loadDefaultMockData = () => {
     setClients(DEFAULT_CLIENTS);
     setTasks(DEFAULT_TASKS);
     setTransactions(DEFAULT_TRANSACTIONS);
+    setReminders(DEFAULT_REMINDERS);
   };
 
   // 3. Theme switch handler
@@ -185,10 +196,28 @@ export default function App() {
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
 
+  // Reminders CRUD
+  const handleAddReminder = (newReminder) => {
+    const rem = { ...newReminder, id: `rem_${Date.now()}` };
+    setReminders(prev => [...prev, rem]);
+  };
+
+  const handleUpdateReminder = (id, updatedReminder) => {
+    setReminders(prev => prev.map(r => r.id === id ? { ...r, ...updatedReminder } : r));
+  };
+
+  const handleDeleteReminder = (id) => {
+    setReminders(prev => prev.filter(r => r.id !== id));
+  };
+
+  const handleToggleReminderCompleted = (id) => {
+    setReminders(prev => prev.map(r => r.id === id ? { ...r, completed: !r.completed } : r));
+  };
+
   // Backup handlers
   const handleExportBackup = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(
-      JSON.stringify({ clients, tasks, transactions, userName })
+      JSON.stringify({ clients, tasks, transactions, userName, reminders })
     );
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
@@ -205,11 +234,12 @@ export default function App() {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target.result);
-        if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName) {
+        if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders) {
           setClients(parsed.clients || []);
           setTasks(parsed.tasks || []);
           setTransactions(parsed.transactions || []);
           setUserName(parsed.userName || 'Social Media');
+          setReminders(parsed.reminders || []);
           alert("Backup restaurado com sucesso!");
         } else {
           alert("Arquivo de backup inválido.");
@@ -227,6 +257,7 @@ export default function App() {
     { id: 'dashboard', label: 'Painel', icon: <LayoutDashboard size={18} /> },
     { id: 'clients', label: 'Clientes', icon: <Users size={18} /> },
     { id: 'tasks', label: 'Tarefas', icon: <CheckSquare size={18} /> },
+    { id: 'agenda', label: 'Agenda', icon: <Calendar size={18} /> },
     { id: 'finance', label: 'Finanças', icon: <DollarSign size={18} /> },
   ];
 
@@ -319,10 +350,10 @@ export default function App() {
       {/* 2. HEADER BAR (Mobile only - md down) */}
       <header className="md:hidden glass-panel border-b border-glass-border p-3 sticky top-0 z-40 flex items-center justify-between w-full">
         <div className="flex items-center gap-3">
-          {/* Hamburger Menu Button */}
+          {/* Hamburger Menu Button (prominent style) */}
           <button 
             onClick={() => setIsSidebarOpen(true)}
-            className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5 transition cursor-pointer"
+            className="p-1.5 rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 transition cursor-pointer flex items-center justify-center shadow-md shadow-indigo-500/10"
             title="Abrir Menu"
           >
             <Menu size={20} />
@@ -370,6 +401,8 @@ export default function App() {
           <Dashboard 
             clients={clients}
             tasks={tasks}
+            reminders={reminders}
+            onToggleReminderCompleted={handleToggleReminderCompleted}
             userName={userName}
             onUpdateUserName={setUserName}
             onNavigate={setCurrentTab}
@@ -408,6 +441,17 @@ export default function App() {
             onAddTask={handleAddTask}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
+          />
+        )}
+
+        {currentTab === 'agenda' && (
+          <AgendaManager 
+            reminders={reminders}
+            clients={clients}
+            onAddReminder={handleAddReminder}
+            onUpdateReminder={handleUpdateReminder}
+            onDeleteReminder={handleDeleteReminder}
+            onToggleReminderCompleted={handleToggleReminderCompleted}
           />
         )}
 
