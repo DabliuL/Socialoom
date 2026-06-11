@@ -61,6 +61,7 @@ export default function App() {
   const [clients, setClients] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [userName, setUserName] = useState('Social Media');
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
   
@@ -87,6 +88,7 @@ export default function App() {
         setClients(parsed.clients || []);
         setTasks(parsed.tasks || []);
         setTransactions(parsed.transactions || []);
+        setUserName(parsed.userName || 'Social Media');
       } catch (e) {
         console.error('Erro ao ler localStorage', e);
         loadDefaultMockData();
@@ -98,14 +100,15 @@ export default function App() {
 
   // 2. Save Data on changes
   useEffect(() => {
-    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0) {
+    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0 || userName !== 'Social Media') {
       localStorage.setItem('socialoom_data', JSON.stringify({
         clients,
         tasks,
-        transactions
+        transactions,
+        userName
       }));
     }
-  }, [clients, tasks, transactions]);
+  }, [clients, tasks, transactions, userName]);
 
   const loadDefaultMockData = () => {
     setClients(DEFAULT_CLIENTS);
@@ -178,7 +181,7 @@ export default function App() {
   // Backup handlers
   const handleExportBackup = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(
-      JSON.stringify({ clients, tasks, transactions })
+      JSON.stringify({ clients, tasks, transactions, userName })
     );
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
@@ -195,10 +198,11 @@ export default function App() {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target.result);
-        if (parsed.clients || parsed.tasks || parsed.transactions) {
+        if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName) {
           setClients(parsed.clients || []);
           setTasks(parsed.tasks || []);
           setTransactions(parsed.transactions || []);
+          setUserName(parsed.userName || 'Social Media');
           alert("Backup restaurado com sucesso!");
         } else {
           alert("Arquivo de backup inválido.");
@@ -327,6 +331,8 @@ export default function App() {
           <Dashboard 
             clients={clients}
             tasks={tasks}
+            userName={userName}
+            onUpdateUserName={setUserName}
             onNavigate={setCurrentTab}
             onAddClient={() => {
               setCurrentTab('clients');

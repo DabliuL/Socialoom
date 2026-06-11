@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Users, 
   TrendingUp, 
@@ -9,18 +9,31 @@ import {
   FileText, 
   ArrowRight,
   CheckSquare,
-  DollarSign
+  DollarSign,
+  Edit2
 } from 'lucide-react';
 import SocialIcon from './SocialIcon';
 
 export default function Dashboard({ 
   clients = [], 
   tasks = [], 
+  userName = 'Social Media',
+  onUpdateUserName,
   onNavigate, 
   onAddClient, 
   onAddTask,
   onUpdateTaskStatus 
 }) {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState(userName);
+
+  const handleSaveName = (e) => {
+    e.preventDefault();
+    if (tempName.trim()) {
+      onUpdateUserName(tempName.trim());
+      setIsEditingName(false);
+    }
+  };
   // Get active clients (status !== 'ended')
   const activeClients = clients.filter(c => c.paymentStatus !== 'ended');
   
@@ -102,7 +115,42 @@ export default function Dashboard({
       {/* Welcome Message */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-text-primary md:text-3xl">Olá, Social Media! 👋</h2>
+          {isEditingName ? (
+            <form onSubmit={handleSaveName} className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+                className="text-xl md:text-2xl font-bold tracking-tight text-text-primary bg-black/10 dark:bg-white/10 border border-glass-border rounded-xl px-3 py-1 outline-none focus:border-indigo-500/50"
+                maxLength={30}
+                autoFocus
+              />
+              <button 
+                type="submit" 
+                className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-xs px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+              >
+                Salvar
+              </button>
+              <button 
+                type="button" 
+                onClick={() => { setIsEditingName(false); setTempName(userName); }} 
+                className="bg-black/5 dark:bg-white/5 border border-glass-border text-text-secondary hover:text-text-primary text-xs px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-2 group">
+              <h2 className="text-2xl font-bold tracking-tight text-text-primary md:text-3xl">Olá, {userName}! 👋</h2>
+              <button 
+                onClick={() => { setIsEditingName(true); setTempName(userName); }}
+                className="p-1 text-text-secondary hover:text-text-primary opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                title="Editar nome"
+              >
+                <Edit2 size={16} />
+              </button>
+            </div>
+          )}
           <p className="text-text-secondary text-sm md:text-base mt-1">Aqui está o resumo da sua plataforma de gestão hoje.</p>
         </div>
         <div className="flex items-center gap-2 text-xs md:text-sm font-medium px-3 py-1.5 rounded-lg glass-panel text-text-secondary">
