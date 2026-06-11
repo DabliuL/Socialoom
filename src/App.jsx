@@ -352,8 +352,7 @@ export default function App() {
             <div className="flex items-center gap-2.5">
               <img src={logoImg} alt="Logo" className="w-9 h-9 rounded-xl object-cover bg-white p-0.5 border border-glass-border shadow-md" />
               <div>
-                <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none mb-1">Socialoom</h1>
-                <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestor Social Media</span>
+                <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none">Socialoom</h1>
               </div>
             </div>
             
@@ -424,7 +423,6 @@ export default function App() {
             <img src={logoImg} alt="Logo" className="w-7 h-7 rounded-lg object-cover bg-white p-0.5 border border-glass-border shadow-sm" />
             <div>
               <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent leading-none">Socialoom</h1>
-              <span className="text-[8px] text-text-secondary font-bold uppercase tracking-wider leading-none">Gestor</span>
             </div>
           </div>
         </div>
