@@ -361,7 +361,7 @@ export default function App() {
               <img src={logoImg} alt="Logo" className="w-9 h-9 rounded-xl object-cover bg-white p-0.5 border border-glass-border shadow-md" />
               <div>
                 <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-amber-500 to-yellow-300 bg-clip-text text-transparent leading-none mb-1">Loom</h1>
-                <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestão de Mídias</span>
+                <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestão de Negócios</span>
               </div>
             </div>
             
