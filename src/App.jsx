@@ -11,7 +11,8 @@ import {
   Sparkles,
   Menu,
   X,
-  Calendar
+  Calendar,
+  FolderOpen
 } from 'lucide-react';
 
 // Components
@@ -20,6 +21,7 @@ import ClientManager from './components/ClientManager';
 import TaskManager from './components/TaskManager';
 import FinanceManager from './components/FinanceManager';
 import AgendaManager from './components/AgendaManager';
+import PastasManager from './components/PastasManager';
 import Modal from './components/Modal';
 
 import logoImg from './assets/logo.jpg';
@@ -74,6 +76,7 @@ export default function App() {
   const [tasks, setTasks] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [reminders, setReminders] = useState([]);
+  const [foldersData, setFoldersData] = useState({});
   const [userName, setUserName] = useState('Social Media');
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
@@ -89,7 +92,7 @@ export default function App() {
   const [clientManagerRef, setClientManagerRef] = useState(null);
 
   const openBackupModal = () => {
-    const data = JSON.stringify({ clients, tasks, transactions, userName, reminders });
+    const data = JSON.stringify({ clients, tasks, transactions, userName, reminders, foldersData });
     setBackupText(data);
     setPasteText('');
     setIsBackupModalOpen(true);
@@ -116,6 +119,7 @@ export default function App() {
         setTransactions(parsed.transactions || []);
         setUserName(parsed.userName || 'Social Media');
         setReminders(parsed.reminders || []);
+        setFoldersData(parsed.foldersData || {});
       } catch (e) {
         console.error('Erro ao ler localStorage', e);
         loadDefaultMockData();
@@ -127,14 +131,15 @@ export default function App() {
 
   // 2. Save Data on changes
   useEffect(() => {
-    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0 || reminders.length > 0 || userName !== 'Social Media') {
+    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0 || reminders.length > 0 || Object.keys(foldersData).length > 0 || userName !== 'Social Media') {
       try {
         localStorage.setItem('socialoom_data', JSON.stringify({
           clients,
           tasks,
           transactions,
           userName,
-          reminders
+          reminders,
+          foldersData
         }));
       } catch (err) {
         console.error('Erro ao salvar dados no localStorage (cota excedida?):', err);
@@ -234,7 +239,7 @@ export default function App() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(backupText);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `socialoom_backup_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute("download", `loom_backup_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -245,19 +250,19 @@ export default function App() {
       try {
         const file = new File(
           [backupText], 
-          `socialoom_backup_${new Date().toISOString().split('T')[0]}.json`, 
+          `loom_backup_${new Date().toISOString().split('T')[0]}.json`, 
           { type: 'application/json' }
         );
         
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            title: 'Socialoom Backup',
-            text: 'Backup dos dados do Socialoom.'
+            title: 'Loom Backup',
+            text: 'Backup dos dados do Loom.'
           });
         } else {
           await navigator.share({
-            title: 'Socialoom Backup Code',
+            title: 'Loom Backup Code',
             text: backupText
           });
         }
@@ -282,12 +287,13 @@ export default function App() {
     }
     try {
       const parsed = JSON.parse(pasteText);
-      if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders) {
+      if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders || parsed.foldersData) {
         setClients(parsed.clients || []);
         setTasks(parsed.tasks || []);
         setTransactions(parsed.transactions || []);
         setUserName(parsed.userName || 'Social Media');
         setReminders(parsed.reminders || []);
+        setFoldersData(parsed.foldersData || {});
         alert("Backup restaurado com sucesso!");
         setIsBackupModalOpen(false);
       } else {
@@ -305,12 +311,13 @@ export default function App() {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target.result);
-        if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders) {
+        if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders || parsed.foldersData) {
           setClients(parsed.clients || []);
           setTasks(parsed.tasks || []);
           setTransactions(parsed.transactions || []);
           setUserName(parsed.userName || 'Social Media');
           setReminders(parsed.reminders || []);
+          setFoldersData(parsed.foldersData || {});
           alert("Backup restaurado com sucesso!");
           setIsBackupModalOpen(false);
         } else {
@@ -330,6 +337,7 @@ export default function App() {
     { id: 'clients', label: 'Clientes', icon: <Users size={18} /> },
     { id: 'tasks', label: 'Tarefas', icon: <CheckSquare size={18} /> },
     { id: 'agenda', label: 'Agenda', icon: <Calendar size={18} /> },
+    { id: 'pastas', label: 'Pastas', icon: <FolderOpen size={18} /> },
     { id: 'finance', label: 'Finanças', icon: <DollarSign size={18} /> },
   ];
 
@@ -352,7 +360,7 @@ export default function App() {
             <div className="flex items-center gap-2.5">
               <img src={logoImg} alt="Logo" className="w-9 h-9 rounded-xl object-cover bg-white p-0.5 border border-glass-border shadow-md" />
               <div>
-                <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-amber-500 to-yellow-300 bg-clip-text text-transparent leading-none mb-1">Socialoom</h1>
+                <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-amber-500 to-yellow-300 bg-clip-text text-transparent leading-none mb-1">Loom</h1>
                 <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Gestão de Mídias</span>
               </div>
             </div>
@@ -423,7 +431,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="Logo" className="w-7 h-7 rounded-lg object-cover bg-white p-0.5 border border-glass-border shadow-sm" />
             <div>
-              <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-amber-500 to-yellow-300 bg-clip-text text-transparent leading-none">Socialoom</h1>
+              <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-amber-500 to-yellow-300 bg-clip-text text-transparent leading-none">Loom</h1>
             </div>
           </div>
         </div>
@@ -505,6 +513,14 @@ export default function App() {
             onUpdateReminder={handleUpdateReminder}
             onDeleteReminder={handleDeleteReminder}
             onToggleReminderCompleted={handleToggleReminderCompleted}
+          />
+        )}
+
+        {currentTab === 'pastas' && (
+          <PastasManager 
+            clients={clients}
+            foldersData={foldersData}
+            onUpdateFoldersData={setFoldersData}
           />
         )}
 
