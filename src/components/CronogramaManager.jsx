@@ -470,20 +470,20 @@ export default function CronogramaManager({
                       <div 
                         key={`day-${day}`}
                         onClick={() => handleOpenAddModal(day)}
-                        className="min-h-[150px] p-2 border-r border-b border-glass-border/70 print:border-slate-200 hover:bg-black/5 dark:hover:bg-white/5 transition flex flex-col justify-between group cursor-pointer"
+                        className="min-h-[160px] p-2.5 border-r border-b border-glass-border/70 print:border-slate-200 hover:bg-black/5 dark:hover:bg-white/5 transition flex flex-col justify-between group cursor-pointer"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-text-secondary/70 print:text-slate-500 group-hover:text-text-primary transition">{day}</span>
+                          <span className="text-sm font-extrabold text-text-secondary/80 print:text-slate-600 group-hover:text-text-primary transition">{day}</span>
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleOpenAddModal(day); }}
                             className="opacity-0 group-hover:opacity-100 p-0.5 rounded-md hover:bg-indigo-500/10 hover:text-indigo-500 transition text-text-secondary print:hidden"
                           >
-                            <Plus size={12} />
+                            <Plus size={14} />
                           </button>
                         </div>
 
                         {/* List of day posts */}
-                        <div className="flex-1 space-y-1.5 mt-1.5 overflow-hidden">
+                        <div className="flex-1 space-y-2 mt-2 overflow-hidden">
                           {dayPosts.map(post => {
                             const cat = categories.find(c => c.value === post.category) || categories[3];
                             const stat = statuses.find(s => s.value === post.status) || statuses[0];
@@ -491,15 +491,17 @@ export default function CronogramaManager({
                               <div
                                 key={post.id}
                                 onClick={(e) => handleOpenEditModal(post, e)}
-                                className={`text-[11px] font-bold px-2 py-1.5 rounded-lg border flex items-center justify-between gap-1 group/item transition cursor-pointer hover:shadow-xs ${stat.color}`}
+                                className={`p-2 rounded-xl border flex flex-col gap-1 group/item transition cursor-pointer hover:shadow-xs ${stat.color}`}
                                 title={`${post.time} - ${cat.label}: ${post.title}`}
                               >
-                                <span className="truncate flex-1 leading-tight">
-                                  <strong className="text-[10px] opacity-90">{post.time}</strong>{' '}
-                                  <span className="text-[9px] uppercase font-extrabold px-1 py-0.2 bg-black/5 dark:bg-white/10 rounded mr-0.5">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] font-black opacity-90">{post.time}</span>
+                                  <span className="text-[8px] font-black uppercase tracking-wider px-1 py-0.2 bg-black/5 dark:bg-white/15 rounded">
                                     {cat.label === 'Post Estático' ? 'Estático' : cat.label}
-                                  </span>{' '}
-                                  <span className="font-semibold">{post.title}</span>
+                                  </span>
+                                </div>
+                                <span className="font-bold text-xs text-text-primary dark:text-white leading-snug whitespace-normal break-words">
+                                  {post.title}
                                 </span>
                               </div>
                             );
