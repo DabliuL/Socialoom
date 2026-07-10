@@ -537,6 +537,7 @@ export default function App() {
             clients={clients}
             contentSchedules={contentSchedules}
             onUpdateContentSchedules={setContentSchedules}
+            userName={userName}
           />
         )}
 

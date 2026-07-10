@@ -49,8 +49,9 @@ const statuses = [
 export default function CronogramaManager({ 
   clients = [], 
   contentSchedules = {}, 
-  onUpdateFoldersData, // Using general update function (we will map it properly in App)
-  onUpdateContentSchedules 
+  onUpdateFoldersData, 
+  onUpdateContentSchedules,
+  userName = 'Social Media'
 }) {
   const [selectedClientId, setSelectedClientId] = useState(clients[0]?.id || '');
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().substring(0, 7)); // YYYY-MM
@@ -209,13 +210,13 @@ export default function CronogramaManager({
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Draw Title and Header Box
-    ctx.fillStyle = '#0f172a'; // Deep slate header
+    ctx.fillStyle = '#000000'; // Pure black header
     ctx.fillRect(0, 0, canvasWidth, headerHeight);
 
     // Title text
     ctx.fillStyle = '#facc15'; // Yellow brand accent
     ctx.font = 'bold 24px Inter, Arial, sans-serif';
-    ctx.fillText('LOOM - CRONOGRAMA DE CONTEÚDOS', 30, 48);
+    ctx.fillText(`${userName.toUpperCase()} - CRONOGRAMA DE CONTEÚDOS`, 30, 48);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 16px Inter, Arial, sans-serif';
