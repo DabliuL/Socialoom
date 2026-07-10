@@ -37,12 +37,13 @@ const categories = [
 ];
 
 const statuses = [
-  { value: 'rascunho', label: 'Rascunho', bg: 'bg-slate-500/10 text-slate-500 border-slate-500/20' },
-  { value: 'producao', label: 'Em Produção', bg: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' },
-  { value: 'aprovacao', label: 'Em Aprovação', bg: 'bg-orange-500/10 text-orange-500 border-orange-500/20' },
-  { value: 'aprovado', label: 'Aprovado', bg: 'bg-teal-500/10 text-teal-500 border-teal-500/20' },
-  { value: 'agendado', label: 'Agendado', bg: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-  { value: 'postado', label: 'Postado', bg: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' }
+  { value: 'rascunho', label: 'Rascunho', color: 'bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-500/20', activeClass: 'bg-blue-500 text-white border-blue-500', hexColor: '#3b82f6', textColor: '#ffffff' },
+  { value: 'producao', label: 'Em Produção', color: 'bg-yellow-500/15 text-yellow-800 dark:text-yellow-400 border-yellow-500/20', activeClass: 'bg-yellow-500 text-black border-yellow-500', hexColor: '#eab308', textColor: '#000000' },
+  { value: 'atrasado', label: 'Atrasado', color: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20', activeClass: 'bg-red-500 text-white border-red-500', hexColor: '#ef4444', textColor: '#ffffff' },
+  { value: 'aprovacao', label: 'Em Aprovação', color: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/20', activeClass: 'bg-orange-500 text-white border-orange-500', hexColor: '#f97316', textColor: '#ffffff' },
+  { value: 'aprovado', label: 'Aprovado', color: 'bg-emerald-700/15 text-emerald-800 dark:text-emerald-400 border-emerald-700/20', activeClass: 'bg-emerald-700 text-white border-emerald-700', hexColor: '#047857', textColor: '#ffffff' },
+  { value: 'agendado', label: 'Agendado', color: 'bg-green-400/15 text-green-800 dark:text-green-400 border-green-400/20', activeClass: 'bg-green-400 text-black border-green-400', hexColor: '#4ade80', textColor: '#000000' },
+  { value: 'postado', label: 'Postado', color: 'bg-lime-500/15 text-lime-800 dark:text-lime-400 border-lime-500/20', activeClass: 'bg-lime-400 text-black border-lime-400', hexColor: '#84cc16', textColor: '#000000' }
 ];
 
 export default function CronogramaManager({ 
@@ -187,10 +188,10 @@ export default function CronogramaManager({
 
     // Calendar grid calculations
     const cols = 7;
-    const cellWidth = 160;
-    const cellHeight = 130;
-    const headerHeight = 120;
-    const weekdaysBarHeight = 40;
+    const cellWidth = 200;
+    const cellHeight = 160;
+    const headerHeight = 140;
+    const weekdaysBarHeight = 50;
 
     // Calculate number of rows needed
     const totalCells = firstDayIndex + totalDays;
@@ -226,11 +227,11 @@ export default function CronogramaManager({
     ctx.fillRect(0, headerHeight, canvasWidth, weekdaysBarHeight);
     
     ctx.fillStyle = '#475569';
-    ctx.font = 'bold 13px Inter, Arial, sans-serif';
+    ctx.font = 'bold 15px Inter, Arial, sans-serif';
     ctx.textAlign = 'center';
     
     for (let i = 0; i < cols; i++) {
-      ctx.fillText(weekdays[i].toUpperCase(), (i * cellWidth) + (cellWidth / 2), headerHeight + 25);
+      ctx.fillText(weekdays[i].toUpperCase(), (i * cellWidth) + (cellWidth / 2), headerHeight + 30);
     }
     ctx.textAlign = 'left'; // Reset
 
@@ -252,24 +253,25 @@ export default function CronogramaManager({
           const currentDay = dayCount;
           // Draw Day Number
           ctx.fillStyle = '#64748b';
-          ctx.font = 'bold 13px Inter, Arial, sans-serif';
-          ctx.fillText(currentDay.toString(), x + 10, y + 22);
+          ctx.font = 'bold 15px Inter, Arial, sans-serif';
+          ctx.fillText(currentDay.toString(), x + 12, y + 25);
 
           // Draw Scheduled Posts for this day
           const dayPosts = monthPosts.filter(p => p.day === currentDay).slice(0, 3); // Max 3 items fit in static canvas cell
-          let tagY = y + 32;
+          let tagY = y + 36;
 
           dayPosts.forEach(post => {
-            const cat = categories.find(cat => cat.value === post.category) || categories[3];
+            const cat = categories.find(c => c.value === post.category) || categories[3];
+            const stat = statuses.find(s => s.value === post.status) || statuses[0];
             
-            // Draw Tag Background
-            ctx.fillStyle = cat.hexColor;
+            // Draw Tag Background (Status Color)
+            ctx.fillStyle = stat.hexColor;
             
             // Round rect draw helper
             const rx = x + 8;
             const ry = tagY;
             const rw = cellWidth - 16;
-            const rh = 24;
+            const rh = 30;
             const radius = 6;
             
             ctx.beginPath();
@@ -286,14 +288,14 @@ export default function CronogramaManager({
             ctx.fill();
 
             // Draw Tag Text
-            ctx.fillStyle = cat.textColor;
-            ctx.font = 'bold 9px Inter, Arial, sans-serif';
-            ctx.fillText(`[${post.time}]`, rx + 6, ry + 15);
+            ctx.fillStyle = stat.textColor;
+            ctx.font = 'bold 11px Inter, Arial, sans-serif';
+            ctx.fillText(`[${post.time}]`, rx + 8, ry + 19);
 
-            ctx.font = '500 9px Inter, Arial, sans-serif';
-            // Wrap text helper for post title
-            const maxTextWidth = rw - 42;
-            let titleText = post.title;
+            ctx.font = 'bold 11px Inter, Arial, sans-serif';
+            // Wrap text helper for post title (showing category name)
+            const maxTextWidth = rw - 54;
+            let titleText = `${cat.label}: ${post.title}`;
             const textMetrics = ctx.measureText(titleText);
             if (textMetrics.width > maxTextWidth) {
               // Truncate
@@ -302,9 +304,9 @@ export default function CronogramaManager({
               }
               titleText += '...';
             }
-            ctx.fillText(titleText, rx + 38, ry + 15);
+            ctx.fillText(titleText, rx + 48, ry + 19);
 
-            tagY += 28;
+            tagY += 36;
           });
 
           // If there are more than 3 posts, draw an indicator
@@ -468,7 +470,7 @@ export default function CronogramaManager({
                       <div 
                         key={`day-${day}`}
                         onClick={() => handleOpenAddModal(day)}
-                        className="min-h-[120px] p-2 border-r border-b border-glass-border/70 print:border-slate-200 hover:bg-black/5 dark:hover:bg-white/5 transition flex flex-col justify-between group cursor-pointer"
+                        className="min-h-[150px] p-2 border-r border-b border-glass-border/70 print:border-slate-200 hover:bg-black/5 dark:hover:bg-white/5 transition flex flex-col justify-between group cursor-pointer"
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-text-secondary/70 print:text-slate-500 group-hover:text-text-primary transition">{day}</span>
@@ -484,15 +486,20 @@ export default function CronogramaManager({
                         <div className="flex-1 space-y-1.5 mt-1.5 overflow-hidden">
                           {dayPosts.map(post => {
                             const cat = categories.find(c => c.value === post.category) || categories[3];
+                            const stat = statuses.find(s => s.value === post.status) || statuses[0];
                             return (
                               <div
                                 key={post.id}
                                 onClick={(e) => handleOpenEditModal(post, e)}
-                                className={`text-[9px] font-semibold px-1.5 py-1 rounded-lg border flex items-center justify-between gap-1 group/item transition cursor-pointer hover:shadow-xs ${cat.color}`}
-                                title={`${post.time} - ${post.title}`}
+                                className={`text-[11px] font-bold px-2 py-1.5 rounded-lg border flex items-center justify-between gap-1 group/item transition cursor-pointer hover:shadow-xs ${stat.color}`}
+                                title={`${post.time} - ${cat.label}: ${post.title}`}
                               >
-                                <span className="truncate flex-1">
-                                  <strong>{post.time}</strong> {post.title}
+                                <span className="truncate flex-1 leading-tight">
+                                  <strong className="text-[10px] opacity-90">{post.time}</strong>{' '}
+                                  <span className="text-[9px] uppercase font-extrabold px-1 py-0.2 bg-black/5 dark:bg-white/10 rounded mr-0.5">
+                                    {cat.label === 'Post Estático' ? 'Estático' : cat.label}
+                                  </span>{' '}
+                                  <span className="font-semibold">{post.title}</span>
                                 </span>
                               </div>
                             );
@@ -569,21 +576,21 @@ export default function CronogramaManager({
                               >
                                 <div className="space-y-1">
                                   <div className="flex items-center justify-between gap-2">
-                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${cat.color}`}>
+                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${cat.color}`}>
                                       {cat.label}
                                     </span>
-                                    <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${stat.bg}`}>
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${stat.color}`}>
                                       {stat.label}
                                     </span>
                                   </div>
-                                  <h5 className="font-bold text-text-primary text-xs truncate mt-1">{post.title}</h5>
+                                  <h5 className="font-bold text-text-primary text-sm truncate mt-1">{post.title}</h5>
                                   {post.notes && (
-                                    <p className="text-text-secondary text-[10px] line-clamp-1 italic">{post.notes}</p>
+                                    <p className="text-text-secondary text-xs line-clamp-1 italic">{post.notes}</p>
                                   )}
                                 </div>
 
-                                <div className="flex items-center justify-between text-[9px] text-text-secondary">
-                                  <div className="flex items-center gap-1 font-semibold">
+                                <div className="flex items-center justify-between text-xs text-text-secondary">
+                                  <div className="flex items-center gap-1 font-semibold text-xs">
                                     <Clock size={10} />
                                     <span>{post.time}</span>
                                   </div>
@@ -668,19 +675,25 @@ export default function CronogramaManager({
                 <option value="Outro">Outro</option>
               </select>
             </div>
+          </div>
 
-            {/* Status */}
-            <div className="space-y-1">
-              <label className="block font-bold text-text-secondary text-xs uppercase">Status / Etapa</label>
-              <select
-                value={postStatus}
-                onChange={(e) => setPostStatus(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary outline-none focus:border-indigo-500/50 cursor-pointer text-xs font-semibold"
-              >
-                {statuses.map(s => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-              </select>
+          {/* Status Selection Buttons */}
+          <div className="space-y-2">
+            <label className="block font-bold text-text-secondary text-xs uppercase text-indigo-400">Status / Etapa</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {statuses.map(s => {
+                const isActive = postStatus === s.value;
+                return (
+                  <button
+                    key={s.value}
+                    type="button"
+                    onClick={() => setPostStatus(s.value)}
+                    className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition text-center cursor-pointer ${isActive ? s.activeClass : 'bg-black/5 dark:bg-white/5 text-text-secondary border-glass-border hover:bg-black/10 dark:hover:bg-white/10'}`}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

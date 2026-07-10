@@ -6,7 +6,10 @@ export default defineConfig({
   plugins: [react()],
   base: './', // Necessário para que o Capacitor encontre os caminhos dos assets no Android
   server: {
-    port: 3000
+    port: 3000,
+    watch: {
+      ignored: ['**/android/**']
+    }
   },
   build: {
     outDir: 'dist'
