@@ -110,3 +110,51 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(156, 163, 175, 0.5);
 }
+
+/* Estilos para Impressão de PDF */
+@media print {
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11px !important;
+  }
+  
+  /* Ocultar elementos de casca, navegação e controles */
+  aside,
+  header,
+  .print\:hidden,
+  button,
+  select,
+  input,
+  .md\:hidden.fixed.bottom-0,
+  div[class*="fixed bottom-0"] {
+    display: none !important;
+  }
+  
+  /* Resetar margens e largura para ocupar a folha A4 inteira */
+  main {
+    margin: 0 !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* Forçar exibição das bordas e background de impressão */
+  .glass-panel {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+  }
+  
+  /* Ajustar grid de calendário para ocupar a largura disponível na folha */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+  
+  div[class*="min-w-[850px]"] {
+    min-w: 100% !important;
+    width: 100% !important;
+  }
+}

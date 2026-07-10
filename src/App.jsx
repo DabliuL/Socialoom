@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   Calendar,
-  FolderOpen
+  FolderOpen,
+  CalendarDays
 } from 'lucide-react';
 
 // Components
@@ -22,6 +23,7 @@ import TaskManager from './components/TaskManager';
 import FinanceManager from './components/FinanceManager';
 import AgendaManager from './components/AgendaManager';
 import PastasManager from './components/PastasManager';
+import CronogramaManager from './components/CronogramaManager';
 import Modal from './components/Modal';
 
 import logoImg from './assets/logo.jpg';
@@ -77,6 +79,7 @@ export default function App() {
   const [transactions, setTransactions] = useState([]);
   const [reminders, setReminders] = useState([]);
   const [foldersData, setFoldersData] = useState({});
+  const [contentSchedules, setContentSchedules] = useState({});
   const [userName, setUserName] = useState('Social Media');
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
@@ -92,7 +95,7 @@ export default function App() {
   const [clientManagerRef, setClientManagerRef] = useState(null);
 
   const openBackupModal = () => {
-    const data = JSON.stringify({ clients, tasks, transactions, userName, reminders, foldersData });
+    const data = JSON.stringify({ clients, tasks, transactions, userName, reminders, foldersData, contentSchedules });
     setBackupText(data);
     setPasteText('');
     setIsBackupModalOpen(true);
@@ -120,6 +123,7 @@ export default function App() {
         setUserName(parsed.userName || 'Social Media');
         setReminders(parsed.reminders || []);
         setFoldersData(parsed.foldersData || {});
+        setContentSchedules(parsed.contentSchedules || {});
       } catch (e) {
         console.error('Erro ao ler localStorage', e);
         loadDefaultMockData();
@@ -131,7 +135,7 @@ export default function App() {
 
   // 2. Save Data on changes
   useEffect(() => {
-    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0 || reminders.length > 0 || Object.keys(foldersData).length > 0 || userName !== 'Social Media') {
+    if (clients.length > 0 || tasks.length > 0 || transactions.length > 0 || reminders.length > 0 || Object.keys(foldersData).length > 0 || Object.keys(contentSchedules).length > 0 || userName !== 'Social Media') {
       try {
         localStorage.setItem('socialoom_data', JSON.stringify({
           clients,
@@ -139,13 +143,14 @@ export default function App() {
           transactions,
           userName,
           reminders,
-          foldersData
+          foldersData,
+          contentSchedules
         }));
       } catch (err) {
         console.error('Erro ao salvar dados no localStorage (cota excedida?):', err);
       }
     }
-  }, [clients, tasks, transactions, userName, reminders]);
+  }, [clients, tasks, transactions, userName, reminders, foldersData, contentSchedules]);
 
   const loadDefaultMockData = () => {
     setClients(DEFAULT_CLIENTS);
@@ -287,13 +292,14 @@ export default function App() {
     }
     try {
       const parsed = JSON.parse(pasteText);
-      if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders || parsed.foldersData) {
+      if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders || parsed.foldersData || parsed.contentSchedules) {
         setClients(parsed.clients || []);
         setTasks(parsed.tasks || []);
         setTransactions(parsed.transactions || []);
         setUserName(parsed.userName || 'Social Media');
         setReminders(parsed.reminders || []);
         setFoldersData(parsed.foldersData || {});
+        setContentSchedules(parsed.contentSchedules || {});
         alert("Backup restaurado com sucesso!");
         setIsBackupModalOpen(false);
       } else {
@@ -311,13 +317,14 @@ export default function App() {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target.result);
-        if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders || parsed.foldersData) {
+        if (parsed.clients || parsed.tasks || parsed.transactions || parsed.userName || parsed.reminders || parsed.foldersData || parsed.contentSchedules) {
           setClients(parsed.clients || []);
           setTasks(parsed.tasks || []);
           setTransactions(parsed.transactions || []);
           setUserName(parsed.userName || 'Social Media');
           setReminders(parsed.reminders || []);
           setFoldersData(parsed.foldersData || {});
+          setContentSchedules(parsed.contentSchedules || {});
           alert("Backup restaurado com sucesso!");
           setIsBackupModalOpen(false);
         } else {
@@ -338,6 +345,7 @@ export default function App() {
     { id: 'tasks', label: 'Tarefas', icon: <CheckSquare size={18} /> },
     { id: 'agenda', label: 'Agenda', icon: <Calendar size={18} /> },
     { id: 'pastas', label: 'Pastas', icon: <FolderOpen size={18} /> },
+    { id: 'cronograma', label: 'Cronograma', icon: <CalendarDays size={18} /> },
     { id: 'finance', label: 'Finanças', icon: <DollarSign size={18} /> },
   ];
 
@@ -524,6 +532,14 @@ export default function App() {
           />
         )}
 
+        {currentTab === 'cronograma' && (
+          <CronogramaManager 
+            clients={clients}
+            contentSchedules={contentSchedules}
+            onUpdateContentSchedules={setContentSchedules}
+          />
+        )}
+
         {currentTab === 'finance' && (
           <FinanceManager 
             clients={clients}
@@ -535,16 +551,15 @@ export default function App() {
         )}
       </main>
 
-      {/* 4. BOTTOM NAVIGATION BAR (Mobile only - md down) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-glass-border p-2 px-6 flex justify-between items-center rounded-t-2xl">
         {navItems.map(item => (
           <button
             key={item.id}
             onClick={() => setCurrentTab(item.id)}
-            className={`flex flex-col items-center gap-1 py-1 px-3 transition cursor-pointer ${currentTab === item.id ? 'text-indigo-500' : 'text-text-secondary'}`}
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 transition cursor-pointer ${currentTab === item.id ? 'text-indigo-500' : 'text-text-secondary'}`}
           >
             {item.icon}
-            <span className="text-[9px] font-bold uppercase">{item.label}</span>
+            <span className="text-[8px] font-bold uppercase hidden sm:inline">{item.label}</span>
           </button>
         ))}
       </div>
