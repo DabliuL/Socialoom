@@ -33,6 +33,7 @@ const categories = [
   { value: 'reels', label: 'Reels', color: 'bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 border-purple-500/20', hexColor: '#a855f7', textColor: '#ffffff' },
   { value: 'estatico', label: 'Post Estático', color: 'bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-500/20', hexColor: '#3b82f6', textColor: '#ffffff' },
   { value: 'carrossel', label: 'Carrossel', color: 'bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border-amber-500/20', hexColor: '#eab308', textColor: '#000000' },
+  { value: 'stories', label: 'Stories', color: 'bg-pink-500/15 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400 border-pink-500/20', hexColor: '#ec4899', textColor: '#ffffff' },
   { value: 'outro', label: 'Outro', color: 'bg-slate-500/15 text-slate-600 dark:bg-slate-500/20 dark:text-slate-400 border-slate-500/20', hexColor: '#64748b', textColor: '#ffffff' }
 ];
 
@@ -181,7 +182,7 @@ export default function CronogramaManager({
   };
 
   // Canvas Export to PNG
-  const handleExportPNG = () => {
+  const handleExportPNG = async () => {
     if (!selectedClient) return;
 
     const canvas = canvasRef.current;
@@ -327,15 +328,46 @@ export default function CronogramaManager({
       }
     }
 
-    // Export & Download trigger
-    const url = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
+    // Export & Share / Download trigger
     const cleanClientName = selectedClient.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-    link.download = `cronograma_${cleanClientName}_${selectedMonth}.png`;
-    link.href = url;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const fileName = `cronograma_${cleanClientName}_${selectedMonth}.png`;
+
+    try {
+      const url = canvas.toDataURL('image/png');
+      
+      // Check if navigator.share and canShare exists (Mobile WebView / Android)
+      if (navigator.share && navigator.canShare) {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const file = new File([blob], fileName, { type: 'image/png' });
+        
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Cronograma - ${selectedClient.name}`,
+            text: `Segue o cronograma de publicações de ${selectedClient.name} para o mês de ${selectedMonth}.`
+          });
+          return;
+        }
+      }
+      
+      // Fallback: Default Browser Download
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (shareErr) {
+      console.error('Erro na exportação/compartilhamento:', shareErr);
+      // Failback to download
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
   };
 
   const handlePrint = () => {
@@ -353,15 +385,17 @@ export default function CronogramaManager({
 
         {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Print PDF */}
-          <button 
-            onClick={handlePrint}
-            disabled={!selectedClientId}
-            className="flex items-center gap-1.5 bg-black/5 dark:bg-white/5 border border-glass-border hover:bg-black/10 dark:hover:bg-white/10 text-text-primary font-bold px-3 py-2 rounded-xl transition text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Imprimir ou Salvar PDF"
-          >
-            <Printer size={14} /> PDF / Imprimir
-          </button>
+          {/* Print PDF (Only visible on web browsers, since Capacitor WebView does not support printing) */}
+          {!window.Capacitor && (
+            <button 
+              onClick={handlePrint}
+              disabled={!selectedClientId}
+              className="flex items-center gap-1.5 bg-black/5 dark:bg-white/5 border border-glass-border hover:bg-black/10 dark:hover:bg-white/10 text-text-primary font-bold px-3 py-2 rounded-xl transition text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Imprimir ou Salvar PDF"
+            >
+              <Printer size={14} /> PDF / Imprimir
+            </button>
+          )}
           
           {/* Download Image */}
           <button 
@@ -444,12 +478,12 @@ export default function CronogramaManager({
           {/* 1. GRID CALENDAR VIEW */}
           {viewMode === 'grid' && (
             <div className="overflow-x-auto rounded-2xl border border-glass-border print:border-slate-300">
-              <div className="min-w-[850px] bg-card-bg/30 dark:bg-card-bg/10 backdrop-blur-md">
+              <div className="min-w-[700px] bg-card-bg/30 dark:bg-card-bg/10 backdrop-blur-md">
                 
                 {/* Weekdays Labels Bar */}
                 <div className="grid grid-cols-7 border-b border-glass-border print:border-slate-300 bg-black/5 dark:bg-white/5">
                   {weekdays.map(day => (
-                    <div key={day} className="py-2.5 text-center text-xs font-bold uppercase tracking-wider text-text-secondary print:text-slate-600">
+                    <div key={day} className="py-2.5 text-center text-sm font-extrabold uppercase tracking-wider text-text-secondary print:text-slate-600">
                       {day}
                     </div>
                   ))}

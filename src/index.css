@@ -155,8 +155,8 @@
     overflow: visible !important;
   }
   
-  div[class*="min-w-[850px]"] {
-    min-w: 100% !important;
+  div[class*="min-w-[700px]"] {
+    min-width: 100% !important;
     width: 100% !important;
   }
 }
