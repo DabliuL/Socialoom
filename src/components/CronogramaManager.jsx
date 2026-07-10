@@ -89,11 +89,11 @@ export default function CronogramaManager({
           directory: Directory.Cache
         });
 
-        // Trigger native share intent
+        // Share the file URI natively using the files array (recommended for attachments)
         await Share.share({
           title: `Cronograma - ${clientName}`,
           text: `Segue o cronograma de publicações de ${clientName} para o mês de ${selectedMonth}.`,
-          url: fileResult.uri
+          files: [fileResult.uri]
         });
         return true;
       }
