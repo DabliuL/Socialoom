@@ -16,6 +16,8 @@ import {
   Clock
 } from 'lucide-react';
 import Modal from './Modal';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 // Base64 to Blob helper for in-memory conversion (avoids fetch CORS blocks in mobile WebViews)
 const dataURLtoBlob = (dataurl) => {
@@ -76,9 +78,6 @@ export default function CronogramaManager({
     try {
       // 1. Android / iOS Native App Sharing (via Capacitor Plugins)
       if (window.Capacitor) {
-        const { Share } = await import('@capacitor/share');
-        const { Filesystem, Directory } = await import('@capacitor/filesystem');
-
         // Extract base64 content from data URL (remove prefix)
         const base64Data = imgDataUrl.split(',')[1];
 
