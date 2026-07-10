@@ -274,8 +274,19 @@ export default function TaskManager({
                       <div className="flex justify-between items-start gap-2">
                         <span className="font-semibold text-text-primary text-sm leading-tight">{task.title}</span>
                         <div className="flex gap-1 flex-shrink-0">
-                          <button onClick={() => onDeleteTask(task.id)} className="text-text-secondary hover:text-red-500 p-1 cursor-pointer"><Trash2 size={12} /></button>
-                          <button onClick={(e) => openEditModal(task, e)} className="text-text-secondary hover:text-indigo-500 p-1 cursor-pointer"><Edit2 size={12} /></button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm('Deseja realmente excluir esta tarefa?')) {
+                                onDeleteTask(task.id);
+                              }
+                            }} 
+                            className="text-text-secondary hover:text-red-500 p-1 cursor-pointer"
+                            title="Excluir"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                          <button onClick={(e) => openEditModal(task, e)} className="text-text-secondary hover:text-indigo-500 p-1 cursor-pointer" title="Editar"><Edit2 size={12} /></button>
                         </div>
                       </div>
 
@@ -334,8 +345,13 @@ export default function TaskManager({
                         <div className="flex justify-between items-start gap-2">
                           <span className="font-semibold text-text-primary text-sm leading-tight">{task.title}</span>
                           <button 
-                            onClick={(e) => { e.stopPropagation(); onDeleteTask(task.id); }} 
-                            className="text-text-secondary hover:text-red-500 opacity-0 group-hover:opacity-100 p-0.5 rounded transition cursor-pointer"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              if (confirm('Deseja realmente excluir esta tarefa?')) {
+                                onDeleteTask(task.id); 
+                              }
+                            }} 
+                            className="text-text-secondary hover:text-red-500 opacity-50 group-hover:opacity-100 p-0.5 rounded transition cursor-pointer"
                             title="Remover"
                           >
                             <Trash2 size={12} />
@@ -447,6 +463,21 @@ export default function TaskManager({
             >
               {selectedTask ? "Salvar Alterações" : "Criar Tarefa"}
             </button>
+            {selectedTask && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm('Deseja realmente excluir esta tarefa?')) {
+                    onDeleteTask(selectedTask.id);
+                    setIsModalOpen(false);
+                  }
+                }}
+                className="px-4 py-2.5 bg-red-500/15 text-red-500 font-bold border border-red-500/10 hover:bg-red-500 hover:text-white rounded-xl transition cursor-pointer"
+                title="Excluir Tarefa"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
