@@ -500,7 +500,7 @@ export default function CronogramaManager({
                                     {cat.label === 'Post Estático' ? 'Estático' : cat.label}
                                   </span>
                                 </div>
-                                <span className="font-bold text-xs text-text-primary dark:text-white leading-snug whitespace-normal break-words">
+                                <span className="font-bold text-xs text-text-primary leading-snug whitespace-normal break-words">
                                   {post.title}
                                 </span>
                               </div>
