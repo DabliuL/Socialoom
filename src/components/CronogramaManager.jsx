@@ -74,6 +74,31 @@ export default function CronogramaManager({
 
   const handleShareNative = async (imgDataUrl, fileName, clientName) => {
     try {
+      // 1. Android / iOS Native App Sharing (via Capacitor Plugins)
+      if (window.Capacitor) {
+        const { Share } = await import('@capacitor/share');
+        const { Filesystem, Directory } = await import('@capacitor/filesystem');
+
+        // Extract base64 content from data URL (remove prefix)
+        const base64Data = imgDataUrl.split(',')[1];
+
+        // Write file to Cache directory
+        const fileResult = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Cache
+        });
+
+        // Trigger native share intent
+        await Share.share({
+          title: `Cronograma - ${clientName}`,
+          text: `Segue o cronograma de publicações de ${clientName} para o mês de ${selectedMonth}.`,
+          url: fileResult.uri
+        });
+        return true;
+      }
+
+      // 2. Web Browser Sharing (via Web Share API)
       if (navigator.share && navigator.canShare) {
         const blob = dataURLtoBlob(imgDataUrl);
         const file = new File([blob], fileName, { type: 'image/png' });
@@ -88,7 +113,7 @@ export default function CronogramaManager({
         }
       }
     } catch (e) {
-      console.error('Erro no compartilhamento nativo:', e);
+      console.error('Erro no compartilhamento:', e);
     }
     return false;
   };
@@ -813,11 +838,16 @@ export default function CronogramaManager({
             📱 <strong>Para salvar ou enviar:</strong> toque e segure o dedo sobre a imagem abaixo e escolha a opção <strong>"Compartilhar"</strong> ou <strong>"Salvar imagem"</strong>.
           </p>
 
-          <div className="border border-glass-border rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 p-2 max-h-[350px] overflow-y-auto">
+          <div className="border border-glass-border rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 p-2 max-h-[350px] overflow-y-auto select-auto">
             <img 
               src={exportedImageSrc} 
               alt="Cronograma Exportado" 
-              className="w-full h-auto rounded-lg object-contain"
+              className="w-full h-auto rounded-lg object-contain select-auto"
+              style={{
+                userSelect: 'auto',
+                WebkitUserSelect: 'auto',
+                WebkitTouchCallout: 'default'
+              }}
             />
           </div>
 
