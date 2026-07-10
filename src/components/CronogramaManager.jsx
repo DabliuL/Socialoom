@@ -17,6 +17,19 @@ import {
 } from 'lucide-react';
 import Modal from './Modal';
 
+// Base64 to Blob helper for in-memory conversion (avoids fetch CORS blocks in mobile WebViews)
+const dataURLtoBlob = (dataurl) => {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[arr.length - 1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+};
+
 // Helper to get days of the month
 const getDaysInMonth = (year, month) => {
   return new Date(year, month, 0).getDate();
@@ -57,6 +70,28 @@ export default function CronogramaManager({
   const [selectedClientId, setSelectedClientId] = useState(clients[0]?.id || '');
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().substring(0, 7)); // YYYY-MM
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [exportedImageSrc, setExportedImageSrc] = useState(null);
+
+  const handleShareNative = async (imgDataUrl, fileName, clientName) => {
+    try {
+      if (navigator.share && navigator.canShare) {
+        const blob = dataURLtoBlob(imgDataUrl);
+        const file = new File([blob], fileName, { type: 'image/png' });
+        
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Cronograma - ${clientName}`,
+            text: `Segue o cronograma de publicações de ${clientName} para o mês de ${selectedMonth}.`
+          });
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error('Erro no compartilhamento nativo:', e);
+    }
+    return false;
+  };
 
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -335,38 +370,28 @@ export default function CronogramaManager({
     try {
       const url = canvas.toDataURL('image/png');
       
-      // Check if navigator.share and canShare exists (Mobile WebView / Android)
-      if (navigator.share && navigator.canShare) {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const file = new File([blob], fileName, { type: 'image/png' });
-        
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: `Cronograma - ${selectedClient.name}`,
-            text: `Segue o cronograma de publicações de ${selectedClient.name} para o mês de ${selectedMonth}.`
-          });
-          return;
-        }
-      }
+      const isMobile = window.Capacitor || /Android|iPhone|iPad/i.test(navigator.userAgent);
       
-      // Fallback: Default Browser Download
-      const link = document.createElement('a');
-      link.download = fileName;
-      link.href = url;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      if (isMobile) {
+        // Try native sharing first (no fetch blocks since we decode in memory)
+        const shared = await handleShareNative(url, fileName, selectedClient.name);
+        if (shared) return; // shared successfully!
+        
+        // Show fallback image preview modal if sharing fails
+        setExportedImageSrc(url);
+      } else {
+        // Desktop: Default Browser Download
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
     } catch (shareErr) {
-      console.error('Erro na exportação/compartilhamento:', shareErr);
-      // Failback to download
-      const link = document.createElement('a');
-      link.download = fileName;
-      link.href = canvas.toDataURL('image/png');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      console.error('Erro na exportação:', shareErr);
+      const url = canvas.toDataURL('image/png');
+      setExportedImageSrc(url);
     }
   };
 
@@ -776,6 +801,42 @@ export default function CronogramaManager({
 
       {/* Hidden Canvas used for PNG image drawing */}
       <canvas ref={canvasRef} className="hidden" />
+
+      {/* MODAL - Image Preview & Export (For Mobile / Android) */}
+      <Modal
+        isOpen={!!exportedImageSrc}
+        onClose={() => setExportedImageSrc(null)}
+        title="Compartilhar Cronograma"
+      >
+        <div className="space-y-4 text-center text-sm print:hidden">
+          <p className="text-text-secondary text-[11px] leading-relaxed">
+            📱 <strong>Para salvar ou enviar:</strong> toque e segure o dedo sobre a imagem abaixo e escolha a opção <strong>"Compartilhar"</strong> ou <strong>"Salvar imagem"</strong>.
+          </p>
+
+          <div className="border border-glass-border rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 p-2 max-h-[350px] overflow-y-auto">
+            <img 
+              src={exportedImageSrc} 
+              alt="Cronograma Exportado" 
+              className="w-full h-auto rounded-lg object-contain"
+            />
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={() => handleShareNative(exportedImageSrc, `cronograma_${selectedClient?.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${selectedMonth}.png`, selectedClient?.name)}
+              className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-black font-bold py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/15 cursor-pointer text-xs"
+            >
+              Compartilhar Novamente
+            </button>
+            <button
+              onClick={() => setExportedImageSrc(null)}
+              className="px-4 py-2.5 bg-black/5 dark:bg-white/5 border border-glass-border text-text-primary font-semibold rounded-xl hover:bg-black/10 dark:hover:bg-white/10 transition cursor-pointer text-xs"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
